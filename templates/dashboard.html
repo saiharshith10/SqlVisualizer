@@ -1,0 +1,54 @@
+{% include 'header.html' %}
+<div class="dashboard-wrapper">
+    <h2 class="welcome-text" style="margin-top:40px;">Welcome, {{ user.username }} 👋</h2>
+    <h3 class="welcome-text">Start learning your SQL</h3>
+
+    <div class="rotating-taskwheel wheel">
+        <div class="task-center">
+            <a href="{{ url_for('where_clause') }}" class="task-petal">
+                <div class="icon">📌</div><div class="label">WHERE</div>
+            </a>
+        </div>
+        <div class="task-center">
+        <a href="{{ url_for('order_by') }}" class="task-petal">
+            <div class="icon">📐</div><div class="label">ORDER BY</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('group_by') }}" class="task-petal">
+            <div class="icon">👥</div><div class="label">GROUP BY</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('crud') }}" class="task-petal">
+            <div class="icon">➕</div><div class="label">CRUD</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('aggregate_functions') }}" class="task-petal">
+            <div class="icon">🧮</div><div class="label">Aggregate</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('data_constraints') }}" class="task-petal">
+            <div class="icon">⛓️</div><div class="label">Constraints</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('joining_data') }}" class="task-petal">
+            <div class="icon">🔗</div><div class="label">Joins</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('functions') }}" class="task-petal">
+            <div class="icon">🧰</div><div class="label">Functions</div>
+        </a>
+            </div>
+        <div class="task-center">
+        <a href="{{ url_for('indexes') }}" class="task-petal">
+            <div class="icon">📂</div><div class="label">Indexes</div>
+        </a>
+            </div>
+
+    </div>
+</div>

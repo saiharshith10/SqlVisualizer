@@ -1,0 +1,20 @@
+{% include 'header.html' %}
+
+<body class="auth-body">
+    <div class="login-wrapper">
+        <div class="login-glass-card">
+            <h2 class="login-title">Register</h2>
+            {% if error %}
+            <p style="color: red;">{{ error }}</p>
+            {% endif %}
+
+            <form method="post">
+                <input type="text" name="username" placeholder="Username" required class="login-input">
+                <input type="password" name="password" placeholder="Password" required class="login-input">
+                <button type="submit" class="login-btn">Register</button>
+            </form>
+            <p>Already have an account? <a href="{{ url_for('login') }}" style="color: #00f0ff;">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

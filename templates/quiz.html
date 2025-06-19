@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ topic }} Quiz</title>
+    <style>
+        :root {
+            --primary: #0f2027;
+            --secondary: #203a43;
+            --highlight: #2c5364;
+            --text-light: #f0f0f0;
+            --accent: #1de9b6;
+            --card: #1a2b38;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            background: linear-gradient(to bottom right, var(--primary), var(--highlight));
+            color: var(--text-light);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        form {
+            background: var(--card);
+            padding: 2rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px var(--shadow);
+            max-width: 750px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            background: -webkit-linear-gradient(45deg, #64ffda, #1de9b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+        }
+
+        .question-block {
+            margin-bottom: 2.5rem;
+            padding: 1.2rem;
+            border-radius: 16px;
+            background: #1e2e3c;
+            box-shadow: inset 0 0 0 rgba(255,255,255,0);
+            transition: 0.3s;
+        }
+
+        .question-number {
+            background: var(--accent);
+            color: var(--primary);
+            display: inline-block;
+            font-weight: bold;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            margin-bottom: 0.6rem;
+            box-shadow: 0 2px 8px rgba(0, 255, 204, 0.3);
+        }
+
+        .question-block p {
+            font-size: 1.1rem;
+            margin: 0.4rem 0 1rem;
+        }
+
+        .option-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .option-label {
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            background: #243748;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .option-label:hover {
+            border-color: var(--accent);
+            background-color: #2d4c64;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        input[type="radio"]:checked + .option-label {
+            border-color: var(--accent);
+            background-color: #2b4c64;
+            box-shadow: 0 0 12px var(--accent);
+        }
+
+        button {
+            margin-top: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: linear-gradient(to right, #64ffda, #1de9b6);
+            color: #0f2027;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+    <form method="post">
+        <h2>{{ topic }} Quiz</h2>
+        {% for q in questions %}
+        <div class="question-block">
+            <span class="question-number">Question {{ loop.index }}</span>
+            <p>{{ q.question }}</p>
+            <div class="option-container">
+                <input type="radio" id="q{{ q.id }}_1" name="question_{{ q.id }}" value="1">
+                <label for="q{{ q.id }}_1" class="option-label">{{ q.option1 }}</label>
+
+                <input type="radio" id="q{{ q.id }}_2" name="question_{{ q.id }}" value="2">
+                <label for="q{{ q.id }}_2" class="option-label">{{ q.option2 }}</label>
+
+                <input type="radio" id="q{{ q.id }}_3" name="question_{{ q.id }}" value="3">
+                <label for="q{{ q.id }}_3" class="option-label">{{ q.option3 }}</label>
+
+                <input type="radio" id="q{{ q.id }}_4" name="question_{{ q.id }}" value="4">
+                <label for="q{{ q.id }}_4" class="option-label">{{ q.option4 }}</label>
+            </div>
+        </div>
+        {% endfor %}
+        <button type="submit">Submit Quiz</button>
+    </form>
+</body>
+</html>

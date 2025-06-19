@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SQL CRUD Operations</title>
+    <style>
+        :root {
+    --primary: #3498db;
+    --success: #00b894;
+    --warning: #f39c12;
+    --danger: #e17055;
+    --dark: #1c1f2b;
+    --light: #b2bec3;
+}
+
+body {
+
+    background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+    color: #f0f0f0;
+    margin: 0;
+
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #1c1f2b;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 30px;
+}
+
+h1 {
+    color: #00cec9;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 10px 20px;
+    cursor: pointer;
+    background: #2f3640;
+    border: 1px solid #444;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+    color: #f0f0f0;
+}
+
+.tab:hover:not(.active) {
+    background: #353b48;
+}
+
+.tab.active {
+    background: #0984e3;
+    color: white;
+    border-color: #0984e3;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #444;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    background: #2f3640;
+    animation: fadeIn 0.5s;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    color: #f0f0f0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+
+.data-table th {
+    background-color: #2d3436;
+    position: sticky;
+    top: 0;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #242731;
+}
+
+.data-table tr:hover {
+    background-color: #353b48;
+}
+
+.data-table tr.new-row {
+    animation: newRow 0.8s;
+    background-color: rgba(0, 184, 148, 0.2);
+}
+
+@keyframes newRow {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+        background-color: rgba(0, 184, 148, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+        background-color: rgba(0, 184, 148, 0.2);
+    }
+}
+
+.data-table tr.updated-row {
+    animation: updatedRow 0.8s;
+    background-color: rgba(243, 156, 18, 0.2);
+}
+
+@keyframes updatedRow {
+    0%, 100% { background-color: rgba(243, 156, 18, 0.2); }
+    50% { background-color: rgba(243, 156, 18, 0.5); }
+}
+
+.data-table tr.deleted-row {
+    animation: deletedRow 0.8s forwards;
+}
+
+@keyframes deletedRow {
+    0% {
+        opacity: 1;
+        transform: translateX(0);
+        background-color: rgba(231, 76, 60, 0.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+        height: 0;
+        padding: 0;
+        border: none;
+    }
+}
+
+.data-table td.updated-cell {
+    animation: updatedCell 0.8s;
+    background-color: rgba(243, 156, 18, 0.3);
+}
+
+@keyframes updatedCell {
+    0%, 100% { background-color: rgba(243, 156, 18, 0.3); }
+    50% {
+        background-color: rgba(243, 156, 18, 0.7);
+        transform: scale(1.05);
+    }
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #f0f0f0;
+}
+
+input, select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background: #2f3640;
+    color: #f0f0f0;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.btn {
+    padding: 10px 15px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 16px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.btn-create { background: var(--success); }
+.btn-update { background: var(--warning); }
+.btn-delete { background: var(--danger); }
+.btn-read   { background: var(--primary); }
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.explanation {
+    background: #1e272e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 4px solid #0984e3;
+}
+
+.explanation h3 {
+    margin-top: 0;
+    color: #00cec9;
+}
+
+.explanation .crud {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.explanation .crud-item {
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    width: 23%;
+    color: #f0f0f0;
+}
+
+.create { background-color: rgba(0, 184, 148, 0.15); border: 1px solid #00b894; }
+.read   { background-color: rgba(45, 52, 54, 0.15); border: 1px solid #636e72; }
+.update { background-color: rgba(243, 156, 18, 0.1); border: 1px solid #f39c12; }
+.delete { background-color: rgba(231, 76, 60, 0.1); border: 1px solid #e17055; }
+
+.status-message {
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    display: none;
+    color: #f0f0f0;
+}
+
+.status-success {
+    background-color: rgba(0, 184, 148, 0.2);
+    border: 1px solid #00b894;
+    display: block;
+}
+
+.status-info {
+    background-color: rgba(52, 152, 219, 0.2);
+    border: 1px solid #3498db;
+    display: block;
+}
+
+.status-warning {
+    background-color: rgba(243, 156, 18, 0.2);
+    border: 1px solid #f39c12;
+    display: block;
+}
+
+.status-error {
+    background-color: rgba(231, 76, 60, 0.2);
+    border: 1px solid #e17055;
+    display: block;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    background: #2f3640;
+    border: 1px solid #555;
+    border-radius: 5px;
+    color: #f0f0f0;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background: #0984e3;
+    color: white;
+    border-color: #0984e3;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive SQL CRUD Operations</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="operations">CRUD Operations</div>
+            <div class="tab" data-tab="explanation">About CRUD</div>
+        </div>
+        
+        <div class="tab-content active" id="operations-tab">
+            <div id="status-message" class="status-message"></div>
+            
+            <div class="controls">
+                <div class="form-group" style="flex: 1;">
+                    <label for="filter-name">Filter by Name:</label>
+                    <input type="text" id="filter-name" placeholder="Enter name to filter">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="sort-by">Sort By:</label>
+                    <select id="sort-by">
+                        <option value="id">ID</option>
+                        <option value="name">Name</option>
+                        <option value="email">Email</option>
+                        <option value="age">Age</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="sort-direction">Direction:</label>
+                    <select id="sort-direction">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+                <button id="apply-read" class="btn btn-read">Apply Filters/Sort</button>
+            </div>
+            
+            <div class="controls">
+                <div class="form-group" style="flex: 2;">
+                    <label for="create-name">Name:</label>
+                    <input type="text" id="create-name" placeholder="Enter name">
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label for="create-email">Email:</label>
+                    <input type="email" id="create-email" placeholder="Enter email">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="create-age">Age:</label>
+                    <input type="number" id="create-age" placeholder="Age">
+                </div>
+                <button id="apply-create" class="btn btn-create">Create Record</button>
+            </div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Age</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Records will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <button id="prev-page">&laquo; Previous</button>
+                <span id="page-info">Page 1 of 1</span>
+                <button id="next-page">Next &raquo;</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="explanation-tab">
+            <div class="explanation">
+                <h3>What are CRUD Operations?</h3>
+                <p>CRUD stands for Create, Read, Update, and Delete - the four basic operations of persistent storage in databases. These operations are fundamental to most database interactions in SQL and NoSQL systems alike.</p>
+                
+                <div class="crud">
+                    <div class="crud-item create">
+                        <h4>CREATE</h4>
+                        <p>Adds new records to the database (SQL: INSERT)</p>
+                        <p><strong>Example:</strong> Adding a new user to a users table</p>
+                    </div>
+                    <div class="crud-item read">
+                        <h4>READ</h4>
+                        <p>Retrieves records from the database (SQL: SELECT)</p>
+                        <p><strong>Example:</strong> Getting a list of all active users</p>
+                    </div>
+                    <div class="crud-item update">
+                        <h4>UPDATE</h4>
+                        <p>Modifies existing records (SQL: UPDATE)</p>
+                        <p><strong>Example:</strong> Changing a user's email address</p>
+                    </div>
+                    <div class="crud-item delete">
+                        <h4>DELETE</h4>
+                        <p>Removes records from the database (SQL: DELETE)</p>
+                        <p><strong>Example:</strong> Removing an inactive user account</p>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 30px;">Why are CRUD Operations Important?</h3>
+                <p>CRUD operations form the foundation of most database interactions in web applications, mobile apps, and enterprise systems. Understanding these operations is essential for:</p>
+                <ul>
+                    <li>Building data-driven applications</li>
+                    <li>Designing database schemas</li>
+                    <li>Creating APIs (RESTful APIs often map directly to CRUD operations)</li>
+                    <li>Implementing data access layers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample initial data
+        let data = [
+            { id: 1, name: "John Doe", email: "john@example.com", age: 28 },
+            { id: 2, name: "Jane Smith", email: "jane@example.com", age: 32 },
+            { id: 3, name: "Bob Johnson", email: "bob@example.com", age: 45 },
+            { id: 4, name: "Alice Williams", email: "alice@example.com", age: 23 },
+            { id: 5, name: "Charlie Brown", email: "charlie@example.com", age: 37 },
+            { id: 6, name: "Diana Prince", email: "diana@example.com", age: 29 },
+            { id: 7, name: "Ethan Hunt", email: "ethan@example.com", age: 41 },
+            { id: 8, name: "Fiona Green", email: "fiona@example.com", age: 34 },
+            { id: 9, name: "George King", email: "george@example.com", age: 52 },
+            { id: 10, name: "Hannah Baker", email: "hannah@example.com", age: 26 }
+        ];
+        
+        // Pagination variables
+        let currentPage = 1;
+        const recordsPerPage = 5;
+        let filteredData = [...data];
+        
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // Display data in table
+        function renderTable() {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * recordsPerPage;
+            const endIndex = Math.min(startIndex + recordsPerPage, filteredData.length);
+            const pageData = filteredData.slice(startIndex, endIndex);
+            
+            // Update page info
+            document.getElementById('page-info').textContent = 
+                `Page ${currentPage} of ${Math.ceil(filteredData.length / recordsPerPage)}`;
+            
+            // Disable/enable pagination buttons
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = 
+                currentPage === Math.ceil(filteredData.length / recordsPerPage);
+            
+            // Create rows
+            pageData.forEach(item => {
+                const row = document.createElement('tr');
+                row.dataset.id = item.id;
+                
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td class="name-cell">${item.name}</td>
+                    <td class="email-cell">${item.email}</td>
+                    <td class="age-cell">${item.age}</td>
+                    <td>
+                        <button class="btn btn-update edit-btn" data-id="${item.id}">Edit</button>
+                        <button class="btn btn-delete delete-btn" data-id="${item.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Add event listeners to edit and delete buttons
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    const item = data.find(i => i.id === id);
+                    
+                    // Replace cells with inputs
+                    const row = this.closest('tr');
+                    const nameCell = row.querySelector('.name-cell');
+                    const emailCell = row.querySelector('.email-cell');
+                    const ageCell = row.querySelector('.age-cell');
+                    
+                    nameCell.innerHTML = `<input type="text" class="edit-name" value="${item.name}">`;
+                    emailCell.innerHTML = `<input type="email" class="edit-email" value="${item.email}">`;
+                    ageCell.innerHTML = `<input type="number" class="edit-age" value="${item.age}">`;
+                    
+                    // Change buttons
+                    this.outerHTML = `<button class="btn btn-success save-btn" data-id="${id}">Save</button>`;
+                    row.querySelector('.delete-btn').outerHTML = 
+                        `<button class="btn btn-danger cancel-btn" data-id="${id}">Cancel</button>`;
+                    
+                    // Add event listeners to new buttons
+                    row.querySelector('.save-btn').addEventListener('click', saveRow);
+                    row.querySelector('.cancel-btn').addEventListener('click', cancelEdit);
+                });
+            });
+            
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    deleteRecord(id);
+                });
+            });
+        }
+        
+        // Save edited row
+        function saveRow() {
+            const id = parseInt(this.dataset.id);
+            const row = this.closest('tr');
+            
+            const newName = row.querySelector('.edit-name').value;
+            const newEmail = row.querySelector('.edit-email').value;
+            const newAge = parseInt(row.querySelector('.edit-age').value);
+            
+            // Find item in data array
+            const itemIndex = data.findIndex(i => i.id === id);
+            if (itemIndex !== -1) {
+                // Check if anything actually changed
+                if (data[itemIndex].name !== newName || 
+                    data[itemIndex].email !== newEmail || 
+                    data[itemIndex].age !== newAge) {
+                    
+                    // Update data
+                    data[itemIndex] = {
+                        ...data[itemIndex],
+                        name: newName,
+                        email: newEmail,
+                        age: newAge
+                    };
+                    
+                    // Reapply filters/sort
+                    applyReadOperations();
+                    
+                    // Find the row in the current view
+                    const viewRow = document.querySelector(`tr[data-id="${id}"]`);
+                    if (viewRow) {
+                        // Highlight the updated row
+                        viewRow.classList.add('updated-row');
+                        
+                        // Highlight the changed cells
+                        if (data[itemIndex].name !== newName) {
+                            viewRow.querySelector('.name-cell').classList.add('updated-cell');
+                        }
+                        if (data[itemIndex].email !== newEmail) {
+                            viewRow.querySelector('.email-cell').classList.add('updated-cell');
+                        }
+                        if (data[itemIndex].age !== newAge) {
+                            viewRow.querySelector('.age-cell').classList.add('updated-cell');
+                        }
+                        
+                        // Remove animations after they complete
+                        setTimeout(() => {
+                            viewRow.classList.remove('updated-row');
+                            viewRow.querySelectorAll('.updated-cell').forEach(cell => {
+                                cell.classList.remove('updated-cell');
+                            });
+                        }, 800);
+                    }
+                    
+                    showStatusMessage(`Record #${id} updated successfully!`, 'success');
+                } else {
+                    showStatusMessage('No changes detected.', 'info');
+                }
+            }
+            
+            // Re-render the row
+            renderTable();
+        }
+        
+        // Cancel edit
+        function cancelEdit() {
+            renderTable();
+        }
+        
+        // Create new record
+        document.getElementById('apply-create').addEventListener('click', function() {
+            const name = document.getElementById('create-name').value.trim();
+            const email = document.getElementById('create-email').value.trim();
+            const age = parseInt(document.getElementById('create-age').value);
+            
+            if (!name || !email || isNaN(age)) {
+                showStatusMessage('Please fill in all fields with valid data.', 'error');
+                return;
+            }
+            
+            // Generate new ID
+            const newId = data.length > 0 ? Math.max(...data.map(i => i.id)) + 1 : 1;
+            
+            // Create new record
+            const newRecord = {
+                id: newId,
+                name,
+                email,
+                age
+            };
+            
+            // Add to data array
+            data.push(newRecord);
+            
+            // Clear form
+            document.getElementById('create-name').value = '';
+            document.getElementById('create-email').value = '';
+            document.getElementById('create-age').value = '';
+            
+            // Reapply filters/sort
+            applyReadOperations();
+            
+            // Find the new row in the table (if it's on the current page)
+            const newRow = document.querySelector(`tr[data-id="${newId}"]`);
+            if (newRow) {
+                newRow.classList.add('new-row');
+                
+                // Scroll to the new row
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // Remove animation class after it completes
+                setTimeout(() => {
+                    newRow.classList.remove('new-row');
+                }, 800);
+            }
+            
+            showStatusMessage(`New record #${newId} created successfully!`, 'success');
+        });
+        
+        // Delete record
+        function deleteRecord(id) {
+            if (!confirm(`Are you sure you want to delete record #${id}?`)) {
+                return;
+            }
+            
+            // Find the row in the current view
+            const row = document.querySelector(`tr[data-id="${id}"]`);
+            if (row) {
+                // Animate deletion
+                row.classList.add('deleted-row');
+                
+                // Remove from data after animation completes
+                setTimeout(() => {
+                    data = data.filter(item => item.id !== id);
+                    applyReadOperations();
+                    showStatusMessage(`Record #${id} deleted successfully!`, 'success');
+                }, 800);
+            }
+        }
+        
+        // Apply read operations (filter and sort)
+        function applyReadOperations() {
+            const filterText = document.getElementById('filter-name').value.toLowerCase();
+            const sortBy = document.getElementById('sort-by').value;
+            const sortDirection = document.getElementById('sort-direction').value;
+            
+            // Filter data
+            filteredData = data.filter(item => 
+                item.name.toLowerCase().includes(filterText)
+            );
+            
+            // Sort data
+            filteredData.sort((a, b) => {
+                if (sortBy === 'age') {
+                    return sortDirection === 'asc' ? a.age - b.age : b.age - a.age;
+                } else {
+                    const valA = String(a[sortBy]).toLowerCase();
+                    const valB = String(b[sortBy]).toLowerCase();
+                    return sortDirection === 'asc' ? 
+                        valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+            });
+            
+            // Reset to first page
+            currentPage = 1;
+            
+            // Re-render table
+            renderTable();
+        }
+        
+        // Apply read operations when button clicked
+        document.getElementById('apply-read').addEventListener('click', applyReadOperations);
+        
+        // Also apply when filter or sort inputs change
+        document.getElementById('filter-name').addEventListener('input', applyReadOperations);
+        document.getElementById('sort-by').addEventListener('change', applyReadOperations);
+        document.getElementById('sort-direction').addEventListener('change', applyReadOperations);
+        
+        // Pagination
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        });
+        
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < Math.ceil(filteredData.length / recordsPerPage)) {
+                currentPage++;
+                renderTable();
+            }
+        });
+        
+        // Show status message
+        function showStatusMessage(message, type) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.className = 'status-message';
+            
+            switch(type) {
+                case 'success':
+                    statusElement.classList.add('status-success');
+                    break;
+                case 'info':
+                    statusElement.classList.add('status-info');
+                    break;
+                case 'warning':
+                    statusElement.classList.add('status-warning');
+                    break;
+                case 'error':
+                    statusElement.classList.add('status-error');
+                    break;
+            }
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusElement.style.opacity = '1';
+                let opacity = 1;
+                const fadeOut = setInterval(() => {
+                    opacity -= 0.1;
+                    statusElement.style.opacity = opacity;
+                    if (opacity <= 0) {
+                        clearInterval(fadeOut);
+                        statusElement.className = 'status-message';
+                        statusElement.style.opacity = '';
+                    }
+                }, 200);
+            }, 5000);
+        }
+        
+        // Initialize
+        applyReadOperations();
+    </script>
+</body>
+</html>

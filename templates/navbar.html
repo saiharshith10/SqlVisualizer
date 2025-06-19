@@ -1,0 +1,38 @@
+<!-- Navbar HTML -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo on left -->
+    <div class="logo">
+      <a href="{{ url_for('home') }}">SQL Hub</a>
+    </div>
+    
+    <!-- Home in middle -->
+    <div class="nav-links">
+      <a href="{{ url_for('home') }}"><i class="fas fa-home"></i> Home</a>
+    </div>
+    
+    <!-- Search and user on right -->
+    <div class="nav-actions">
+      
+      <!-- User Dropdown with Username -->
+      <div class="profile-dropdown">
+        <div class="user-profile">
+          <i class="fas fa-user-circle"></i>
+          
+        </div>
+        <div class="dropdown-menu">
+          <a href="{{ url_for('user_score_display') }}"><i class="fas fa-star"></i> User Score</a>
+          <a href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a>
+          <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+          
+          <a href="{{ url_for('logout') }}" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          <a href="{{ url_for('unregister') }}"  onclick="return confirm('Are you sure you want to delete your account?');"><i class="fas fa-user-minus"></i>
+            Unregister
+        </a>
+        
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

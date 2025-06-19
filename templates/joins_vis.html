@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Joins Visualization</title>
+    <style>
+        .main-content {
+    display: flex;
+    min-height: 100vh;
+}
+
+.topic-body {
+    flex: 1;
+    padding: 20px;
+    background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+    color: #f0f0f0;
+}
+
+h1 {
+    color: #00f5d4;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #1abc9c, #16a085);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 8px #0e1a22, -4px -4px 8px #2d5d7f;
+}
+
+button:hover {
+    background: #148f77;
+    transform: translateY(-2px);
+}
+
+button.active {
+    background: #0f2027;
+    transform: translateY(0);
+    box-shadow: inset 2px 2px 6px #0b141a, inset -2px -2px 6px #26475d;
+}
+
+.visualization-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    background: #1a1f2d;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 6px 6px 16px #0d141c, -6px -6px 16px #2f4858;
+    margin: 0 auto;
+}
+
+.venn-section {
+    flex: 1;
+    min-width: 400px;
+}
+
+.tables-section {
+    flex: 1;
+    min-width: 500px;
+}
+
+.venn-container {
+    position: relative;
+    width: 400px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.8;
+    mix-blend-mode: screen;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    transition: all 0.8s ease;
+}
+
+.circle-a {
+    background-color: #ff6b6b;
+    width: 180px;
+    height: 180px;
+    top: 60px;
+    left: 50px;
+}
+
+.circle-b {
+    background-color: #4dabf7;
+    width: 180px;
+    height: 180px;
+    top: 60px;
+    left: 170px;
+}
+
+.intersection {
+    position: absolute;
+    background-color: #a29bfe;
+    width: 120px;
+    height: 120px;
+    top: 90px;
+    left: 140px;
+    opacity: 0.8;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.label {
+    position: absolute;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.8s ease;
+}
+
+.label-a {
+    top: 30px;
+    left: 120px;
+    color: #ff7675;
+}
+
+.label-b {
+    top: 30px;
+    left: 260px;
+    color: #74b9ff;
+}
+
+.result-label {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    height: 30px;
+    color: #00cec9;
+    text-align: center;
+}
+
+.description {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #263445;
+    border-radius: 12px;
+    line-height: 1.6;
+    color: #dfe6e9;
+}
+
+.inner-join .circle-a,
+.inner-join .circle-b {
+    left: 110px;
+}
+
+.inner-join .intersection {
+    opacity: 1;
+    width: 180px;
+    height: 180px;
+    top: 60px;
+    left: 110px;
+}
+
+.tables-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-tables {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.table-container {
+    flex: 1;
+    min-width: 200px;
+}
+
+.table-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 6px;
+}
+
+.table-a-title {
+    background-color: rgba(255, 118, 117, 0.15);
+    color: #ff7675;
+}
+
+.table-b-title {
+    background-color: rgba(116, 185, 255, 0.15);
+    color: #74b9ff;
+}
+
+.result-title {
+    background-color: rgba(162, 155, 254, 0.15);
+    color: #a29bfe;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1f2d3a;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+th {
+    background-color: #19232f;
+    font-weight: bold;
+    color: #dfe6e9;
+}
+
+tr:nth-child(even) {
+    background-color: #273545;
+}
+
+.highlight-row {
+    animation: highlight-fade 1.5s;
+    background-color: rgba(162, 155, 254, 0.3);
+}
+
+.highlight-a {
+    animation: highlight-fade 1.5s;
+    background-color: rgba(255, 118, 117, 0.3);
+}
+
+.highlight-b {
+    animation: highlight-fade 1.5s;
+    background-color: rgba(116, 185, 255, 0.3);
+}
+
+@keyframes highlight-fade {
+    0% { background-color: rgba(255, 255, 0, 0.3); }
+    100% { background-color: inherit; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.null-value {
+    color: #636e72;
+    font-style: italic;
+}
+
+.highlight {
+    opacity: 1;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.quiz-button {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.btn-quiz {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #6c5ce7, #a29bfe);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 8px #141b29, -4px -4px 8px #384469;
+}
+
+.btn-quiz:hover {
+    background: linear-gradient(145deg, #5e4bc6, #8177d8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+    </style>
+</head>
+<body>
+    <h1>SQL Joins Visualization</h1>
+
+    <div class="controls">
+        <button onclick="showJoin('inner')" class="active">INNER JOIN</button>
+        <button onclick="showJoin('left')">LEFT JOIN</button>
+        <button onclick="showJoin('right')">RIGHT JOIN</button>
+        <button onclick="showJoin('full')">FULL JOIN</button>
+    </div>
+
+    <div class="result-label">INNER JOIN: Returns only matching rows</div>
+
+    <div class="visualization-container">
+        <div class="venn-section">
+            <div class="venn-container inner-join">
+                <div class="circle circle-a">Table A</div>
+                <div class="circle circle-b">Table B</div>
+                <div class="intersection highlight">Matching rows</div>
+                <div class="label label-a">Table A</div>
+                <div class="label label-b">Table B</div>
+            </div>
+
+            <div class="description">
+                <p id="join-description">An INNER JOIN returns only the rows where there is a match in both tables. The result is the intersection of the two tables.</p>
+            </div>
+        </div>
+
+        <div class="tables-section">
+            <div class="tables-container">
+                <div class="input-tables">
+                    <div class="table-container">
+                        <div class="table-title table-a-title">Table A (Customers)</div>
+                        <table id="table-a">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-id="1" class="highlight-row">
+                                    <td>1</td>
+                                    <td>Alice</td>
+                                </tr>
+                                <tr data-id="2">
+                                    <td>2</td>
+                                    <td>Bob</td>
+                                </tr>
+                                <tr data-id="3" class="highlight-row">
+                                    <td>3</td>
+                                    <td>Charlie</td>
+                                </tr>
+                                <tr data-id="4">
+                                    <td>4</td>
+                                    <td>David</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-title table-b-title">Table B (Orders)</div>
+                        <table id="table-b">
+                            <thead>
+                                <tr>
+                                    <th>CustomerID</th>
+                                    <th>Order</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-id="1" class="highlight-row">
+                                    <td>1</td>
+                                    <td>Laptop</td>
+                                </tr>
+                                <tr data-id="3" class="highlight-row">
+                                    <td>3</td>
+                                    <td>Monitor</td>
+                                </tr>
+                                <tr data-id="5">
+                                    <td>5</td>
+                                    <td>Keyboard</td>
+                                </tr>
+                                <tr data-id="6">
+                                    <td>6</td>
+                                    <td>Mouse</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-title result-title">Result Table</div>
+                    <table id="result-table">
+                        <thead>
+                            <tr>
+                                <th>A.ID</th>
+                                <th>A.Name</th>
+                                <th>B.CustomerID</th>
+                                <th>B.Order</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="fade-in">
+                                <td>1</td>
+                                <td>Alice</td>
+                                <td>1</td>
+                                <td>Laptop</td>
+                            </tr>
+                            <tr class="fade-in">
+                                <td>3</td>
+                                <td>Charlie</td>
+                                <td>3</td>
+                                <td>Monitor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const tableAData = [
+            { id: 1, name: 'Alice' },
+            { id: 2, name: 'Bob' },
+            { id: 3, name: 'Charlie' },
+            { id: 4, name: 'David' }
+        ];
+
+        const tableBData = [
+            { customerId: 1, order: 'Laptop' },
+            { customerId: 3, order: 'Monitor' },
+            { customerId: 5, order: 'Keyboard' },
+            { customerId: 6, order: 'Mouse' }
+        ];
+
+        // Current join type
+        let currentJoinType = 'inner';
+
+        function showJoin(joinType) {
+            // Update active button
+            document.querySelectorAll('.controls button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update Venn diagram
+            const venn = document.querySelector('.venn-container');
+            venn.className = 'venn-container ' + joinType + '-join';
+
+            // Update result label and description
+            const resultLabel = document.querySelector('.result-label');
+            const description = document.getElementById('join-description');
+
+            switch(joinType) {
+                case 'inner':
+                    resultLabel.textContent = 'INNER JOIN: Returns only matching rows';
+                    description.textContent = 'An INNER JOIN returns only the rows where there is a match in both tables. The result is the intersection of the two tables.';
+                    break;
+                case 'left':
+                    resultLabel.textContent = 'LEFT JOIN: Returns all rows from left table with matches from right (or null)';
+                    description.textContent = 'A LEFT JOIN returns all rows from the left table (Table A), with the matching rows from the right table (Table B). If there is no match, the result is NULL on the right side.';
+                    break;
+                case 'right':
+                    resultLabel.textContent = 'RIGHT JOIN: Returns all rows from right table with matches from left (or null)';
+                    description.textContent = 'A RIGHT JOIN returns all rows from the right table (Table B), with the matching rows from the left table (Table A). If there is no match, the result is NULL on the left side.';
+                    break;
+                case 'full':
+                    resultLabel.textContent = 'FULL JOIN: Returns all rows when there is a match in either table';
+                    description.textContent = 'A FULL JOIN returns all rows when there is a match in one of the tables. It combines the results of both LEFT and RIGHT joins. Rows without matches will have NULL values for columns from the table without a match.';
+                    break;
+            }
+
+            // Highlight appropriate parts of the Venn diagram
+            const intersection = document.querySelector('.intersection');
+            const circleA = document.querySelector('.circle-a');
+            const circleB = document.querySelector('.circle-b');
+
+            intersection.classList.remove('highlight');
+            circleA.classList.remove('highlight');
+            circleB.classList.remove('highlight');
+
+            switch(joinType) {
+                case 'inner':
+                    intersection.classList.add('highlight');
+                    break;
+                case 'left':
+                    circleA.classList.add('highlight');
+                    intersection.classList.add('highlight');
+                    break;
+                case 'right':
+                    circleB.classList.add('highlight');
+                    intersection.classList.add('highlight');
+                    break;
+                case 'full':
+                    circleA.classList.add('highlight');
+                    circleB.classList.add('highlight');
+                    intersection.classList.add('highlight');
+                    break;
+            }
+
+            // Update the result table
+            updateResultTable(joinType);
+
+            // Highlight rows in input tables
+            highlightInputTables(joinType);
+
+            currentJoinType = joinType;
+        }
+
+        function updateResultTable(joinType) {
+            const resultTable = document.getElementById('result-table');
+            const tbody = resultTable.querySelector('tbody');
+
+            // First fade out all existing rows
+            const existingRows = Array.from(tbody.querySelectorAll('tr'));
+            existingRows.forEach(row => {
+                row.classList.add('fade-out');
+                setTimeout(() => row.remove(), 500);
+            });
+
+            // Calculate the join result based on the join type
+            let resultRows = [];
+
+            switch(joinType) {
+                case 'inner':
+                    // INNER JOIN: Only matching rows
+                    resultRows = tableAData.flatMap(aRow => {
+                        const matchingB = tableBData.filter(bRow => bRow.customerId === aRow.id);
+                        return matchingB.map(bRow => ({
+                            aId: aRow.id,
+                            aName: aRow.name,
+                            bCustomerId: bRow.customerId,
+                            bOrder: bRow.order
+                        }));
+                    });
+                    break;
+
+                case 'left':
+                    // LEFT JOIN: All rows from A, with matching from B or null
+                    resultRows = tableAData.map(aRow => {
+                        const matchingB = tableBData.find(bRow => bRow.customerId === aRow.id);
+                        return {
+                            aId: aRow.id,
+                            aName: aRow.name,
+                            bCustomerId: matchingB ? matchingB.customerId : null,
+                            bOrder: matchingB ? matchingB.order : null
+                        };
+                    });
+                    break;
+
+                case 'right':
+                    // RIGHT JOIN: All rows from B, with matching from A or null
+                    resultRows = tableBData.map(bRow => {
+                        const matchingA = tableAData.find(aRow => aRow.id === bRow.customerId);
+                        return {
+                            aId: matchingA ? matchingA.id : null,
+                            aName: matchingA ? matchingA.name : null,
+                            bCustomerId: bRow.customerId,
+                            bOrder: bRow.order
+                        };
+                    });
+                    break;
+
+                case 'full':
+                    // FULL JOIN: All rows from both tables, with matches where they exist
+                    const leftJoin = tableAData.map(aRow => {
+                        const matchingB = tableBData.find(bRow => bRow.customerId === aRow.id);
+                        return {
+                            aId: aRow.id,
+                            aName: aRow.name,
+                            bCustomerId: matchingB ? matchingB.customerId : null,
+                            bOrder: matchingB ? matchingB.order : null,
+                            source: matchingB ? 'both' : 'a'
+                        };
+                    });
+
+                    const rightJoin = tableBData.map(bRow => {
+                        const matchingA = tableAData.find(aRow => aRow.id === bRow.customerId);
+                        if (!matchingA) {
+                            return {
+                                aId: null,
+                                aName: null,
+                                bCustomerId: bRow.customerId,
+                                bOrder: bRow.order,
+                                source: 'b'
+                            };
+                        }
+                        return null; // Already included in leftJoin
+                    }).filter(row => row !== null);
+
+                    resultRows = [...leftJoin, ...rightJoin];
+                    break;
+            }
+
+            // Add new rows with fade-in animation
+            setTimeout(() => {
+                resultRows.forEach(rowData => {
+                    const row = document.createElement('tr');
+                    row.classList.add('fade-in');
+
+                    const aIdCell = document.createElement('td');
+                    aIdCell.textContent = rowData.aId !== null ? rowData.aId : 'NULL';
+                    if (rowData.aId === null) aIdCell.classList.add('null-value');
+                    row.appendChild(aIdCell);
+
+                    const aNameCell = document.createElement('td');
+                    aNameCell.textContent = rowData.aName !== null ? rowData.aName : 'NULL';
+                    if (rowData.aName === null) aNameCell.classList.add('null-value');
+                    row.appendChild(aNameCell);
+
+                    const bIdCell = document.createElement('td');
+                    bIdCell.textContent = rowData.bCustomerId !== null ? rowData.bCustomerId : 'NULL';
+                    if (rowData.bCustomerId === null) bIdCell.classList.add('null-value');
+                    row.appendChild(bIdCell);
+
+                    const bOrderCell = document.createElement('td');
+                    bOrderCell.textContent = rowData.bOrder !== null ? rowData.bOrder : 'NULL';
+                    if (rowData.bOrder === null) bOrderCell.classList.add('null-value');
+                    row.appendChild(bOrderCell);
+
+                    tbody.appendChild(row);
+                });
+            }, 500);
+        }
+
+        function highlightInputTables(joinType) {
+            // Reset all highlights
+            document.querySelectorAll('#table-a tr, #table-b tr').forEach(row => {
+                row.classList.remove('highlight-row', 'highlight-a', 'highlight-b');
+            });
+
+            // Get all matching IDs based on join type
+            let highlightAIds = [];
+            let highlightBIds = [];
+
+            switch(joinType) {
+                case 'inner':
+                    // Highlight matching rows in both tables
+                    highlightAIds = tableBData.map(b => b.customerId).filter(id =>
+                        tableAData.some(a => a.id === id)
+                    );
+                    highlightBIds = highlightAIds;
+                    break;
+
+                case 'left':
+                    // Highlight all rows in A, matching rows in B
+                    highlightAIds = tableAData.map(a => a.id);
+                    highlightBIds = tableAData.map(a => a.id).filter(id =>
+                        tableBData.some(b => b.customerId === id)
+                    );
+                    break;
+
+                case 'right':
+                    // Highlight all rows in B, matching rows in A
+                    highlightBIds = tableBData.map(b => b.customerId);
+                    highlightAIds = tableBData.map(b => b.customerId).filter(id =>
+                        tableAData.some(a => a.id === id)
+                    );
+                    break;
+
+                case 'full':
+                    // Highlight all rows in both tables
+                    highlightAIds = tableAData.map(a => a.id);
+                    highlightBIds = tableBData.map(b => b.customerId);
+                    break;
+            }
+
+            // Apply highlights with slight delay for better visual effect
+            setTimeout(() => {
+                // Highlight Table A
+                highlightAIds.forEach(id => {
+                    const row = document.querySelector(`#table-a tr[data-id="${id}"]`);
+                    if (row) {
+                        if (tableBData.some(b => b.customerId === id)) {
+                            row.classList.add('highlight-row');
+                        } else {
+                            row.classList.add('highlight-a');
+                        }
+                    }
+                });
+
+                // Highlight Table B
+                highlightBIds.forEach(id => {
+                    const row = document.querySelector(`#table-b tr[data-id="${id}"]`);
+                    if (row) {
+                        if (tableAData.some(a => a.id === id)) {
+                            row.classList.add('highlight-row');
+                        } else {
+                            row.classList.add('highlight-b');
+                        }
+                    }
+                });
+            }, 300);
+        }
+
+        // Initialize the visualization
+        document.addEventListener('DOMContentLoaded', () => {
+            showJoin('inner');
+        });
+    </script>
+</body>
+</html>

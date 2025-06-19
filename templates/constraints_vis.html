@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Constraints Visualization</title>
+    <style>
+        body {
+
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    margin: 0;
+
+    color: #f0f0f0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+}
+
+.controls {
+    background-color: #1c2b38;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 4px 4px 10px #0e1b24, -4px -4px 10px #2e4454;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.control-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.control-group h3 {
+    margin-top: 0;
+    color: #6ec1e4;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 10px;
+}
+
+.constraint-checkbox {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    color: #dce3ea;
+}
+
+.constraint-checkbox input {
+    margin-right: 10px;
+}
+
+.tables-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.table {
+    background-color: #1c2b38;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 4px 4px 10px #0e1b24, -4px -4px 10px #2e4454;
+    flex: 1;
+    min-width: 300px;
+    transition: all 0.3s ease;
+}
+
+.table-header {
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #34495e;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffffff;
+}
+
+.table-name {
+    font-size: 1.2em;
+    color: #ffffff;
+}
+
+.table-constraints {
+    font-size: 0.8em;
+    color: #bdc3c7;
+}
+
+.table-row {
+    display: flex;
+    flex-wrap: wrap; /* allows wrapping if needed */
+    padding: 8px 0;
+    border-bottom: 1px solid #2e3e50;
+    transition: all 0.3s ease;
+    color: #f0f0f0;
+    overflow-x: auto; /* scrolls if content is wider */
+}
+
+.table-row.header {
+    font-weight: bold;
+    background-color: #273746;
+    color: #ffffff;
+}
+
+.table-cell {
+    flex: 1 1 0; /* make cells responsive */
+    padding: 0 5px;
+    position: relative;
+    word-break: break-word; /* prevent long text from overflowing */
+    min-width: 80px; /* ensure minimum width for each column */
+}
+
+.primary-key {
+    background-color: rgba(46, 204, 113, 0.15);
+    border-left: 3px solid #2ecc71;
+}
+
+.foreign-key {
+    background-color: rgba(52, 152, 219, 0.15);
+    border-left: 3px solid #3498db;
+}
+
+.unique {
+    background-color: rgba(155, 89, 182, 0.15);
+    border-left: 3px solid #9b59b6;
+}
+
+.not-null {
+    background-color: rgba(241, 196, 15, 0.15);
+    border-left: 3px solid #f1c40f;
+}
+
+.check {
+    background-color: rgba(230, 126, 34, 0.15);
+    border-left: 3px solid #e67e22;
+}
+
+.default {
+    background-color: rgba(26, 188, 156, 0.15);
+    border-left: 3px solid #1abc9c;
+}
+
+.null-value {
+    color: #95a5a6;
+    font-style: italic;
+}
+
+.error {
+    color: #e74c3c;
+    animation: shake 0.5s;
+}
+
+.relationship-line {
+    position: absolute;
+    background-color: #3498db;
+    height: 2px;
+    transform-origin: left center;
+    z-index: -1;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+.constraint-badge {
+    display: inline-block;
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    color: white;
+}
+
+.badge-pk {
+    background-color: #2ecc71;
+}
+
+.badge-fk {
+    background-color: #3498db;
+}
+
+.badge-unique {
+    background-color: #9b59b6;
+}
+
+.badge-notnull {
+    background-color: #f1c40f;
+    color: #1c1c1c;
+}
+
+.badge-check {
+    background-color: #e67e22;
+}
+
+.badge-default {
+    background-color: #1abc9c;
+}
+
+.explanation {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #1f2f3b;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    color: #f5f6f7;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 2px 2px 6px #0e1b24, -2px -2px 6px #2e4454;
+}
+.department-id {
+    flex: 0 0 50px; /* fixed width of 50px */
+    text-align: center;
+}
+
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Constraints Interactive Visualization</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>Table Constraints</h3>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="primary-key" checked>
+                    <label for="primary-key">PRIMARY KEY (id)</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="foreign-key" checked>
+                    <label for="foreign-key">FOREIGN KEY (department_id)</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="unique-email" checked>
+                    <label for="unique-email">UNIQUE (email)</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="not-null-name" checked>
+                    <label for="not-null-name">NOT NULL (name)</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="check-salary" checked>
+                    <label for="check-salary">CHECK (salary > 0)</label>
+                </div>
+                <div class="constraint-checkbox">
+                    <input type="checkbox" id="default-status" checked>
+                    <label for="default-status">DEFAULT 'active' (status)</label>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <h3>Actions</h3>
+                <div class="action-buttons">
+                    <button id="add-row">Add Random Row</button>
+                    <button id="add-null">Add Row with NULL</button>
+                    <button id="duplicate-email">Duplicate Email</button>
+                    <button id="negative-salary">Negative Salary</button>
+                </div>
+                <div class="action-buttons">
+                    <button id="reset">Reset Table</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tables-container">
+            <div class="table" id="employees-table">
+                <div class="table-header">
+                    <span class="table-name">Employees</span>
+                    <span class="table-constraints">Constraints: <span id="emp-constraints">PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT</span></span>
+                </div>
+                <div class="table-row header">
+                    <div class="table-cell">id</div>
+                    <div class="table-cell">name</div>
+                    <div class="table-cell">email</div>
+                    <div class="table-cell">salary</div>
+                    <div class="table-cell">department_id</div>
+                    <div class="table-cell">status</div>
+                </div>
+                <div id="employees-data">
+                    <!-- Data will be inserted here by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="table" id="departments-table">
+                <div class="table-header">
+                    <span class="table-name">Departments</span>
+                    <span class="table-constraints">Constraints: PK</span>
+                </div>
+                <div class="table-row header">
+                    <div class="table-cell">id</div>
+                    <div class="table-cell">name</div>
+                </div>
+                <div id="departments-data">
+                    <div class="table-row">
+                        <div class="table-cell primary-key">1</div>
+                        <div class="table-cell">Engineering</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-cell primary-key">2</div>
+                        <div class="table-cell">Marketing</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-cell primary-key">3</div>
+                        <div class="table-cell">Sales</div>
+                    </div>
+                    <div class="table-row">
+                        <div class="table-cell primary-key">4</div>
+                        <div class="table-cell">HR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="explanation" id="explanation">
+            <strong>How it works:</strong> Toggle constraints on/off using the checkboxes above. Try adding rows that violate constraints to see how they protect data integrity. The visualization will highlight constrained columns and show error messages when constraints are violated.
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sample data
+            let employees = [
+                {id: 1, name: 'John Doe', email: 'john@example.com', salary: 75000, department_id: 1, status: 'active'},
+                {id: 2, name: 'Jane Smith', email: 'jane@example.com', salary: 85000, department_id: 2, status: 'active'},
+                {id: 3, name: 'Bob Johnson', email: 'bob@example.com', salary: 65000, department_id: 1, status: 'on leave'}
+            ];
+            
+            let departments = [
+                {id: 1, name: 'Engineering'},
+                {id: 2, name: 'Marketing'},
+                {id: 3, name: 'Sales'},
+                {id: 4, name: 'HR'}
+            ];
+            
+            // DOM elements
+            const employeesData = document.getElementById('employees-data');
+            const explanation = document.getElementById('explanation');
+            const empConstraintsSpan = document.getElementById('emp-constraints');
+            
+            // Checkboxes
+            const primaryKeyCheckbox = document.getElementById('primary-key');
+            const foreignKeyCheckbox = document.getElementById('foreign-key');
+            const uniqueEmailCheckbox = document.getElementById('unique-email');
+            const notNullNameCheckbox = document.getElementById('not-null-name');
+            const checkSalaryCheckbox = document.getElementById('check-salary');
+            const defaultStatusCheckbox = document.getElementById('default-status');
+            
+            // Buttons
+            const addRowBtn = document.getElementById('add-row');
+            const addNullBtn = document.getElementById('add-null');
+            const duplicateEmailBtn = document.getElementById('duplicate-email');
+            const negativeSalaryBtn = document.getElementById('negative-salary');
+            const resetBtn = document.getElementById('reset');
+            
+            // Render employees table
+            function renderEmployees() {
+                employeesData.innerHTML = '';
+                
+                // Update constraints display
+                let constraints = [];
+                if (primaryKeyCheckbox.checked) constraints.push('PK');
+                if (foreignKeyCheckbox.checked) constraints.push('FK');
+                if (uniqueEmailCheckbox.checked) constraints.push('UNIQUE');
+                if (notNullNameCheckbox.checked) constraints.push('NOT NULL');
+                if (checkSalaryCheckbox.checked) constraints.push('CHECK');
+                if (defaultStatusCheckbox.checked) constraints.push('DEFAULT');
+                empConstraintsSpan.textContent = constraints.join(', ') || 'None';
+                
+                employees.forEach(emp => {
+                    const row = document.createElement('div');
+                    row.className = 'table-row';
+                    
+                    // Apply constraint classes
+                    const idClass = primaryKeyCheckbox.checked ? 'primary-key' : '';
+                    const emailClass = uniqueEmailCheckbox.checked ? 'unique' : '';
+                    const nameClass = notNullNameCheckbox.checked ? 'not-null' : '';
+                    const salaryClass = checkSalaryCheckbox.checked ? 'check' : '';
+                    const deptClass = foreignKeyCheckbox.checked ? 'foreign-key' : '';
+                    const statusClass = defaultStatusCheckbox.checked ? 'default' : '';
+                    
+                    row.innerHTML = `
+                        <div class="table-cell ${idClass}">${emp.id}</div>
+                        <div class="table-cell ${nameClass}">${emp.name || '<span class="null-value">NULL</span>'}</div>
+                        <div class="table-cell ${emailClass}">${emp.email || '<span class="null-value">NULL</span>'}</div>
+                        <div class="table-cell ${salaryClass}">${emp.salary}</div>
+                        <div class="table-cell ${deptClass}">${emp.department_id || '<span class="null-value">NULL</span>'}</div>
+                        <div class="table-cell ${statusClass}">${emp.status || '<span class="null-value">NULL</span>'}</div>
+                    `;
+                    
+                    employeesData.appendChild(row);
+                });
+                
+                // Draw relationship lines if FK is enabled
+                drawRelationshipLines();
+            }
+            
+            // Draw lines between foreign keys and primary keys
+            function drawRelationshipLines() {
+                // Remove existing lines
+                document.querySelectorAll('.relationship-line').forEach(el => el.remove());
+                
+                if (!foreignKeyCheckbox.checked) return;
+                
+                const employeesTable = document.getElementById('employees-table');
+                const departmentsTable = document.getElementById('departments-table');
+                
+                const empRect = employeesTable.getBoundingClientRect();
+                const deptRect = departmentsTable.getBoundingClientRect();
+                
+                // Find all foreign key cells in employees table
+                document.querySelectorAll('#employees-data .foreign-key').forEach(fkCell => {
+                    const deptId = fkCell.textContent.trim();
+                    if (!deptId || deptId === 'NULL') return;
+                    
+                    // Find corresponding primary key in departments table
+                    const pkCell = document.querySelector(`#departments-data .primary-key:contains('${deptId}')`);
+                    if (!pkCell) return;
+                    
+                    const fkRect = fkCell.getBoundingClientRect();
+                    const pkRect = pkCell.getBoundingClientRect();
+                    
+                    // Calculate line position
+                    const startX = fkRect.right - empRect.left;
+                    const startY = fkRect.top + fkRect.height/2 - empRect.top;
+                    const endX = pkRect.left - empRect.left;
+                    const endY = pkRect.top + pkRect.height/2 - empRect.top;
+                    
+                    // Calculate distance and angle
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    // Create line
+                    const line = document.createElement('div');
+                    line.className = 'relationship-line';
+                    line.style.width = `${length}px`;
+                    line.style.left = `${startX}px`;
+                    line.style.top = `${startY}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    employeesTable.appendChild(line);
+                });
+            }
+            
+            // Add a random employee
+            function addRandomEmployee() {
+                const names = ['Alice Brown', 'Charlie Wilson', 'Diana Prince', 'Evan Wright', 'Fiona Green'];
+                const emails = ['alice@example.com', 'charlie@example.com', 'diana@example.com', 'evan@example.com', 'fiona@example.com'];
+                const statuses = ['active', 'on leave', 'terminated'];
+                
+                // Generate random data that (mostly) complies with constraints
+                const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                const name = names[Math.floor(Math.random() * names.length)];
+                const email = emails[Math.floor(Math.random() * emails.length)];
+                const salary = Math.floor(Math.random() * 50000) + 30000;
+                const department_id = Math.floor(Math.random() * 4) + 1;
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                // Check constraints
+                let errors = [];
+                
+                // PRIMARY KEY check
+                if (primaryKeyCheckbox.checked && employees.some(e => e.id === newId)) {
+                    errors.push('PRIMARY KEY violation: ID must be unique');
+                }
+                
+                // UNIQUE email check
+                if (uniqueEmailCheckbox.checked && employees.some(e => e.email === email)) {
+                    errors.push('UNIQUE constraint violation: Email must be unique');
+                }
+                
+                // NOT NULL name check
+                if (notNullNameCheckbox.checked && !name) {
+                    errors.push('NOT NULL constraint violation: Name cannot be NULL');
+                }
+                
+                // CHECK salary check
+                if (checkSalaryCheckbox.checked && salary <= 0) {
+                    errors.push('CHECK constraint violation: Salary must be > 0');
+                }
+                
+                // FOREIGN KEY check
+                if (foreignKeyCheckbox.checked && !departments.some(d => d.id === department_id)) {
+                    errors.push('FOREIGN KEY constraint violation: Invalid department');
+                }
+                
+                if (errors.length > 0) {
+                    showError(errors.join('<br>'));
+                    return;
+                }
+                
+                // DEFAULT status if not provided
+                const finalStatus = defaultStatusCheckbox.checked ? status : (status || 'active');
+                
+                employees.push({
+                    id: newId,
+                    name: name,
+                    email: email,
+                    salary: salary,
+                    department_id: department_id,
+                    status: finalStatus
+                });
+                
+                renderEmployees();
+                showExplanation('Added new employee with random data that complies with active constraints.');
+            }
+            
+            // Add employee with NULL values to test constraints
+            function addEmployeeWithNulls() {
+                const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                
+                let errors = [];
+                
+                // PRIMARY KEY check
+                if (primaryKeyCheckbox.checked && employees.some(e => e.id === newId)) {
+                    errors.push('PRIMARY KEY violation: ID must be unique');
+                }
+                
+                // NOT NULL name check
+                if (notNullNameCheckbox.checked) {
+                    errors.push('NOT NULL constraint violation: Name cannot be NULL');
+                }
+                
+                if (errors.length > 0) {
+                    showError(errors.join('<br>'));
+                    return;
+                }
+                
+                employees.push({
+                    id: newId,
+                    name: null,
+                    email: null,
+                    salary: null,
+                    department_id: null,
+                    status: null
+                });
+                
+                renderEmployees();
+                showExplanation('Added employee with NULL values. Notice how constraints prevent certain NULL values when enabled.');
+            }
+            
+            // Add employee with duplicate email
+            function addDuplicateEmail() {
+                if (employees.length === 0) {
+                    showError('No employees to duplicate email from');
+                    return;
+                }
+                
+                const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                const duplicateEmail = employees[0].email;
+                
+                let errors = [];
+                
+                // PRIMARY KEY check
+                if (primaryKeyCheckbox.checked && employees.some(e => e.id === newId)) {
+                    errors.push('PRIMARY KEY violation: ID must be unique');
+                }
+                
+                // UNIQUE email check
+                if (uniqueEmailCheckbox.checked && employees.some(e => e.email === duplicateEmail)) {
+                    errors.push('UNIQUE constraint violation: Email must be unique');
+                }
+                
+                if (errors.length > 0) {
+                    showError(errors.join('<br>'));
+                    return;
+                }
+                
+                employees.push({
+                    id: newId,
+                    name: 'Duplicate Email',
+                    email: duplicateEmail,
+                    salary: 50000,
+                    department_id: 1,
+                    status: 'active'
+                });
+                
+                renderEmployees();
+                showExplanation('Attempted to add employee with duplicate email. UNIQUE constraint prevents this when enabled.');
+            }
+            
+            // Add employee with negative salary
+            function addNegativeSalary() {
+                const newId = employees.length > 0 ? Math.max(...employees.map(e => e.id)) + 1 : 1;
+                
+                let errors = [];
+                
+                // PRIMARY KEY check
+                if (primaryKeyCheckbox.checked && employees.some(e => e.id === newId)) {
+                    errors.push('PRIMARY KEY violation: ID must be unique');
+                }
+                
+                // CHECK salary check
+                if (checkSalaryCheckbox.checked) {
+                    errors.push('CHECK constraint violation: Salary must be > 0');
+                }
+                
+                if (errors.length > 0) {
+                    showError(errors.join('<br>'));
+                    return;
+                }
+                
+                employees.push({
+                    id: newId,
+                    name: 'Negative Salary',
+                    email: 'negative@example.com',
+                    salary: -10000,
+                    department_id: 1,
+                    status: 'active'
+                });
+                
+                renderEmployees();
+                showExplanation('Attempted to add employee with negative salary. CHECK constraint prevents this when enabled.');
+            }
+            
+            // Reset table to initial state
+            function resetTable() {
+                employees = [
+                    {id: 1, name: 'John Doe', email: 'john@example.com', salary: 75000, department_id: 1, status: 'active'},
+                    {id: 2, name: 'Jane Smith', email: 'jane@example.com', salary: 85000, department_id: 2, status: 'active'},
+                    {id: 3, name: 'Bob Johnson', email: 'bob@example.com', salary: 65000, department_id: 1, status: 'on leave'}
+                ];
+                
+                renderEmployees();
+                showExplanation('Table reset to initial state.');
+            }
+            
+            // Show error message
+            function showError(message) {
+                explanation.innerHTML = `<strong>Error:</strong> ${message}`;
+                explanation.style.backgroundColor = '#fdecea';
+                explanation.style.borderLeftColor = '#e74c3c';
+                
+                // Flash error animation
+                explanation.classList.add('error');
+                setTimeout(() => {
+                    explanation.classList.remove('error');
+                }, 500);
+            }
+            
+            // Show explanation message
+            function showExplanation(message) {
+                explanation.innerHTML = `<strong>Explanation:</strong> ${message}`;
+                explanation.style.backgroundColor = '#f8f9fa';
+                explanation.style.borderLeftColor = '#3498db';
+            }
+            
+            // Event listeners
+            primaryKeyCheckbox.addEventListener('change', renderEmployees);
+            foreignKeyCheckbox.addEventListener('change', renderEmployees);
+            uniqueEmailCheckbox.addEventListener('change', renderEmployees);
+            notNullNameCheckbox.addEventListener('change', renderEmployees);
+            checkSalaryCheckbox.addEventListener('change', renderEmployees);
+            defaultStatusCheckbox.addEventListener('change', renderEmployees);
+            
+            addRowBtn.addEventListener('click', addRandomEmployee);
+            addNullBtn.addEventListener('click', addEmployeeWithNulls);
+            duplicateEmailBtn.addEventListener('click', addDuplicateEmail);
+            negativeSalaryBtn.addEventListener('click', addNegativeSalary);
+            resetBtn.addEventListener('click', resetTable);
+            
+            // Initial render
+            renderEmployees();
+            
+            // Resize observer to redraw relationship lines when window resizes
+            const resizeObserver = new ResizeObserver(() => {
+                drawRelationshipLines();
+            });
+            
+            resizeObserver.observe(document.body);
+        });
+    </script>
+</body>
+</html>

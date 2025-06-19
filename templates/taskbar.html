@@ -1,0 +1,33 @@
+<div class="taskbar-container">
+    <!-- Rotating wheel with 8 petals -->
+    <div class="taskbar-wheel">
+        <div class="taskbar-wheel-inner">
+            {% set topics = {
+                'where_clause': '📌 WHERE & WITH',
+                'order_by': '📐 ORDER BY & LIMIT',
+                'group_by': '👥 GROUP BY & HAVING',
+                'crud': '➕ CRUD',
+                'aggregate_functions': '🧮 Aggregate',
+                'data_constraints': '⛓️ Constraints',
+                'joining_data': '🔗 Joins',
+                'functions': '🧰 Functions',
+                'indexes': '📚 Indexes'
+            } %}
+
+            {% for route, label in topics.items() %}
+                {% if route != active_topic %}
+                    <a href="{{ url_for(route) }}" class="taskbar-petal">
+                        <div class="taskbar-icon">{{ label.split()[0] }}</div>
+                        <div class="taskbar-label">{{ label.split(' ', 1)[1] }}</div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        <!-- Center fixed topic -->
+        <div class="taskbar-center">
+            <div class="taskbar-icon">{{ topics[active_topic].split()[0] }}</div>
+            <div class="taskbar-label">{{ topics[active_topic].split(' ', 1)[1] }}</div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive SQL Functions Visualization</title>
+    <style>
+        body {
+
+    background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+    color: #f0f0f0;
+    margin: 0;
+
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #1f2a35;
+    border-radius: 16px;
+    box-shadow: 8px 8px 16px #0d141b, -8px -8px 16px #2e3e4d;
+    padding: 30px;
+}
+
+h1 {
+    color: #00cec9;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 32px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #34495e;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    background: #1f2a35;
+    border: none;
+    border-radius: 12px 12px 0 0;
+    margin: 0 5px;
+    color: #b2bec3;
+    transition: all 0.3s ease;
+    box-shadow: inset 2px 2px 4px #0e141b, inset -2px -2px 4px #2a3b4b;
+}
+
+.tab.active {
+    background: linear-gradient(145deg, #2c3e50, #34495e);
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.tab:hover:not(.active) {
+    background: #2a3b4b;
+}
+
+.tab-content {
+    display: none;
+    padding: 25px;
+    background: #2f3640;
+    border-radius: 0 0 16px 16px;
+    animation: fadeIn 0.5s;
+    box-shadow: inset 3px 3px 6px #1c1f26, inset -3px -3px 6px #3d4a59;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.function-selector {
+    margin-bottom: 20px;
+}
+
+select {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    font-size: 16px;
+    background: #1e272e;
+    color: #f0f0f0;
+    box-shadow: inset 2px 2px 5px #141b20, inset -2px -2px 5px #2f3942;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #2f3640;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 5px 5px 15px #1a1d22, -5px -5px 15px #3c4855;
+}
+
+.data-table th, .data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #3a3f4a;
+    color: #ecf0f1;
+}
+
+.data-table th {
+    background-color: #1e272e;
+    color: #00cec9;
+    font-weight: bold;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #25303b;
+}
+
+.data-table tr:hover {
+    background-color: #34495e;
+}
+
+.original-value {
+    color: #95a5a6;
+    position: relative;
+}
+
+.original-value::after {
+    content: "→";
+    margin: 0 10px;
+    color: #00cec9;
+}
+
+.transformed-value {
+    font-weight: bold;
+    color: #ecf0f1;
+    display: inline-block;
+}
+
+.string-transform {
+    animation: stringTransform 0.8s ease-in-out;
+}
+
+@keyframes stringTransform {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.number-transform {
+    animation: numberPulse 0.8s ease-in-out;
+}
+
+@keyframes numberPulse {
+    0% { transform: scale(1); color: #7f8c8d; }
+    50% { transform: scale(1.3); color: #e74c3c; }
+    100% { transform: scale(1); color: #f0f0f0; }
+}
+
+.date-transform {
+    animation: dateSlide 0.8s ease;
+}
+
+@keyframes dateSlide {
+    0% { transform: translateX(-20px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #16a085, #1abc9c);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-shadow: 4px 4px 8px #1c1f26, -4px -4px 8px #2f3942;
+}
+
+button:hover {
+    background: #0e7e6c;
+    transform: translateY(-2px);
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #dfe6e9;
+}
+
+input {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    width: 100%;
+    background: #1e272e;
+    color: #f0f0f0;
+    box-shadow: inset 2px 2px 5px #141b20, inset -2px -2px 5px #2f3942;
+}
+
+.explanation {
+    background: #1e272e;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border-left: 4px solid #00cec9;
+    box-shadow: 4px 4px 12px #1c1f26, -4px -4px 12px #2f3942;
+}
+
+.explanation h3 {
+    margin-top: 0;
+    color: #00cec9;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive SQL Functions Visualization</h1>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="string">String Functions</div>
+            <div class="tab" data-tab="numeric">Numeric Functions</div>
+            <div class="tab" data-tab="date">Date Functions</div>
+        </div>
+        
+        <div class="tab-content active" id="string-tab">
+            <div class="function-selector">
+                <label for="string-function">Select String Function:</label>
+                <select id="string-function">
+                    <option value="UPPER">UPPER() - Convert to uppercase</option>
+                    <option value="LOWER">LOWER() - Convert to lowercase</option>
+                    <option value="LENGTH">LENGTH() - Get string length</option>
+                    <option value="TRIM">TRIM() - Remove whitespace</option>
+                    <option value="CONCAT">CONCAT() - Concatenate strings</option>
+                    <option value="SUBSTR">SUBSTR() - Extract substring</option>
+                    <option value="REPLACE">REPLACE() - Replace text</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="concat-input" style="display: none;">
+                <label for="concat-value">Text to concatenate:</label>
+                <input type="text" id="concat-value" placeholder="Enter text to concatenate">
+            </div>
+            
+            <div class="input-group" id="substr-input" style="display: none;">
+                <label for="substr-start">Start position:</label>
+                <input type="number" id="substr-start" min="1" value="1">
+                <label for="substr-length">Length (optional):</label>
+                <input type="number" id="substr-length" min="1" placeholder="Leave empty for rest of string">
+            </div>
+            
+            <div class="input-group" id="replace-input" style="display: none;">
+                <label for="replace-old">Text to replace:</label>
+                <input type="text" id="replace-old" placeholder="Old text">
+                <label for="replace-new">Replacement text:</label>
+                <input type="text" id="replace-new" placeholder="New text">
+            </div>
+            
+            <button id="apply-string">Apply Function</button>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Original Value</th>
+                        <th>Transformed Value</th>
+                    </tr>
+                </thead>
+                <tbody id="string-results">
+                    <!-- Results will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="explanation">
+                <h3>About String Functions</h3>
+                <p>String functions in SQL allow you to manipulate text data. Common operations include changing case, extracting parts of strings, combining strings, and replacing text. These functions are essential for data cleaning and formatting.</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="numeric-tab">
+            <div class="function-selector">
+                <label for="numeric-function">Select Numeric Function:</label>
+                <select id="numeric-function">
+                    <option value="ROUND">ROUND() - Round to nearest integer</option>
+                    <option value="CEIL">CEIL() - Round up</option>
+                    <option value="FLOOR">FLOOR() - Round down</option>
+                    <option value="ABS">ABS() - Absolute value</option>
+                    <option value="POWER">POWER() - Raise to power</option>
+                    <option value="SQRT">SQRT() - Square root</option>
+                    <option value="MOD">MOD() - Modulo/remainder</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="power-input" style="display: none;">
+                <label for="power-value">Exponent:</label>
+                <input type="number" id="power-value" value="2">
+            </div>
+            
+            <div class="input-group" id="mod-input" style="display: none;">
+                <label for="mod-value">Divisor:</label>
+                <input type="number" id="mod-value" value="2">
+            </div>
+            
+            <button id="apply-numeric">Apply Function</button>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Original Value</th>
+                        <th>Transformed Value</th>
+                    </tr>
+                </thead>
+                <tbody id="numeric-results">
+                    <!-- Results will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="explanation">
+                <h3>About Numeric Functions</h3>
+                <p>Numeric functions perform mathematical operations on numbers. They include rounding functions, absolute value calculations, exponents, roots, and modulo operations. These are fundamental for data analysis and calculations in SQL.</p>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="date-tab">
+            <div class="function-selector">
+                <label for="date-function">Select Date Function:</label>
+                <select id="date-function">
+                    <option value="NOW">NOW() - Current date and time</option>
+                    <option value="DATEADD">DATEADD() - Add to date</option>
+                    <option value="DATEDIFF">DATEDIFF() - Difference between dates</option>
+                    <option value="YEAR">YEAR() - Extract year</option>
+                    <option value="MONTH">MONTH() - Extract month</option>
+                    <option value="DAY">DAY() - Extract day</option>
+                    <option value="FORMAT">FORMAT() - Format date</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="dateadd-input" style="display: none;">
+                <label for="dateadd-value">Value to add:</label>
+                <input type="number" id="dateadd-value" value="1">
+                <label for="dateadd-unit">Unit:</label>
+                <select id="dateadd-unit">
+                    <option value="DAY">Days</option>
+                    <option value="MONTH">Months</option>
+                    <option value="YEAR">Years</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="datediff-input" style="display: none;">
+                <label for="datediff-date">Compare to date:</label>
+                <input type="date" id="datediff-date">
+                <label for="datediff-unit">Unit:</label>
+                <select id="datediff-unit">
+                    <option value="DAY">Days</option>
+                    <option value="MONTH">Months</option>
+                    <option value="YEAR">Years</option>
+                </select>
+            </div>
+            
+            <div class="input-group" id="format-input" style="display: none;">
+                <label for="format-string">Format string:</label>
+                <input type="text" id="format-string" value="YYYY-MM-DD">
+                <small>Common formats: YYYY-MM-DD, MM/DD/YYYY, DD-MON-YYYY, Day, Month YYYY</small>
+            </div>
+            
+            <button id="apply-date">Apply Function</button>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Original Value</th>
+                        <th>Transformed Value</th>
+                    </tr>
+                </thead>
+                <tbody id="date-results">
+                    <!-- Results will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="explanation">
+                <h3>About Date Functions</h3>
+                <p>Date functions manipulate and extract information from date/time values. They allow you to perform calculations with dates, extract components (year, month, day), and format dates for display. These are crucial for time-based analysis and reporting.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for each category
+        const stringData = [
+            "Hello World", 
+            "SQL Functions", 
+            "Interactive Demo",
+            "  Trim Me  ",
+            "CASE Conversion"
+        ];
+        
+        const numericData = [42.7, -15.3, 3.14159, 100, 7.8, -99.99, 0.5];
+        
+        const dateData = [
+            "2023-01-15",
+            "2023-06-30",
+            "2023-12-25",
+            "2024-02-29",
+            "2023-03-15"
+        ];
+        
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // Show/hide additional inputs based on function selection
+        document.getElementById('string-function').addEventListener('change', function() {
+            document.getElementById('concat-input').style.display = 'none';
+            document.getElementById('substr-input').style.display = 'none';
+            document.getElementById('replace-input').style.display = 'none';
+            
+            if (this.value === 'CONCAT') {
+                document.getElementById('concat-input').style.display = 'block';
+            } else if (this.value === 'SUBSTR') {
+                document.getElementById('substr-input').style.display = 'block';
+            } else if (this.value === 'REPLACE') {
+                document.getElementById('replace-input').style.display = 'block';
+            }
+        });
+        
+        document.getElementById('numeric-function').addEventListener('change', function() {
+            document.getElementById('power-input').style.display = 'none';
+            document.getElementById('mod-input').style.display = 'none';
+            
+            if (this.value === 'POWER') {
+                document.getElementById('power-input').style.display = 'block';
+            } else if (this.value === 'MOD') {
+                document.getElementById('mod-input').style.display = 'block';
+            }
+        });
+        
+        document.getElementById('date-function').addEventListener('change', function() {
+            document.getElementById('dateadd-input').style.display = 'none';
+            document.getElementById('datediff-input').style.display = 'none';
+            document.getElementById('format-input').style.display = 'none';
+            
+            if (this.value === 'DATEADD') {
+                document.getElementById('dateadd-input').style.display = 'block';
+            } else if (this.value === 'DATEDIFF') {
+                document.getElementById('datediff-input').style.display = 'block';
+                document.getElementById('datediff-date').valueAsDate = new Date();
+            } else if (this.value === 'FORMAT') {
+                document.getElementById('format-input').style.display = 'block';
+            }
+        });
+        
+        // String functions
+        document.getElementById('apply-string').addEventListener('click', function() {
+            const functionName = document.getElementById('string-function').value;
+            const resultsContainer = document.getElementById('string-results');
+            resultsContainer.innerHTML = '';
+            
+            stringData.forEach(value => {
+                let transformed;
+                const row = document.createElement('tr');
+                const originalCell = document.createElement('td');
+                const transformedCell = document.createElement('td');
+                
+                originalCell.textContent = `"${value}"`;
+                originalCell.className = 'original-value';
+                
+                switch(functionName) {
+                    case 'UPPER':
+                        transformed = value.toUpperCase();
+                        break;
+                    case 'LOWER':
+                        transformed = value.toLowerCase();
+                        break;
+                    case 'LENGTH':
+                        transformed = value.length;
+                        break;
+                    case 'TRIM':
+                        transformed = value.trim();
+                        break;
+                    case 'CONCAT':
+                        const concatValue = document.getElementById('concat-value').value || '';
+                        transformed = value + concatValue;
+                        break;
+                    case 'SUBSTR':
+                        const start = parseInt(document.getElementById('substr-start').value) || 1;
+                        const length = parseInt(document.getElementById('substr-length').value);
+                        if (length) {
+                            transformed = value.substr(start - 1, length);
+                        } else {
+                            transformed = value.substr(start - 1);
+                        }
+                        break;
+                    case 'REPLACE':
+                        const oldText = document.getElementById('replace-old').value || '';
+                        const newText = document.getElementById('replace-new').value || '';
+                        transformed = value.replace(new RegExp(oldText, 'g'), newText);
+                        break;
+                    default:
+                        transformed = value;
+                }
+                
+                const transformedSpan = document.createElement('span');
+                transformedSpan.className = 'transformed-value string-transform';
+                transformedSpan.textContent = functionName === 'LENGTH' ? transformed : `"${transformed}"`;
+                
+                transformedCell.appendChild(transformedSpan);
+                row.appendChild(originalCell);
+                row.appendChild(transformedCell);
+                resultsContainer.appendChild(row);
+                
+                // Trigger reflow to restart animation
+                void transformedSpan.offsetWidth;
+                transformedSpan.classList.add('string-transform');
+            });
+        });
+        
+        // Numeric functions
+        document.getElementById('apply-numeric').addEventListener('click', function() {
+            const functionName = document.getElementById('numeric-function').value;
+            const resultsContainer = document.getElementById('numeric-results');
+            resultsContainer.innerHTML = '';
+            
+            numericData.forEach(value => {
+                let transformed;
+                const row = document.createElement('tr');
+                const originalCell = document.createElement('td');
+                const transformedCell = document.createElement('td');
+                
+                originalCell.textContent = value;
+                originalCell.className = 'original-value';
+                
+                switch(functionName) {
+                    case 'ROUND':
+                        transformed = Math.round(value);
+                        break;
+                    case 'CEIL':
+                        transformed = Math.ceil(value);
+                        break;
+                    case 'FLOOR':
+                        transformed = Math.floor(value);
+                        break;
+                    case 'ABS':
+                        transformed = Math.abs(value);
+                        break;
+                    case 'POWER':
+                        const exponent = parseFloat(document.getElementById('power-value').value) || 2;
+                        transformed = Math.pow(value, exponent);
+                        break;
+                    case 'SQRT':
+                        transformed = Math.sqrt(Math.abs(value)).toFixed(4);
+                        break;
+                    case 'MOD':
+                        const modValue = parseFloat(document.getElementById('mod-value').value) || 2;
+                        transformed = value % modValue;
+                        break;
+                    default:
+                        transformed = value;
+                }
+                
+                const transformedSpan = document.createElement('span');
+                transformedSpan.className = 'transformed-value number-transform';
+                transformedSpan.textContent = transformed;
+                
+                transformedCell.appendChild(transformedSpan);
+                row.appendChild(originalCell);
+                row.appendChild(transformedCell);
+                resultsContainer.appendChild(row);
+                
+                // Trigger reflow to restart animation
+                void transformedSpan.offsetWidth;
+                transformedSpan.classList.add('number-transform');
+            });
+        });
+        
+        // Date functions
+        document.getElementById('apply-date').addEventListener('click', function() {
+            const functionName = document.getElementById('date-function').value;
+            const resultsContainer = document.getElementById('date-results');
+            resultsContainer.innerHTML = '';
+            
+            dateData.forEach(dateStr => {
+                const date = new Date(dateStr);
+                let transformed;
+                const row = document.createElement('tr');
+                const originalCell = document.createElement('td');
+                const transformedCell = document.createElement('td');
+                
+                originalCell.textContent = date.toISOString().split('T')[0];
+                originalCell.className = 'original-value';
+                
+                switch(functionName) {
+                    case 'NOW':
+                        transformed = new Date().toISOString();
+                        break;
+                    case 'DATEADD':
+                        const addValue = parseInt(document.getElementById('dateadd-value').value) || 1;
+                        const addUnit = document.getElementById('dateadd-unit').value;
+                        const newDate = new Date(date);
+                        
+                        if (addUnit === 'DAY') newDate.setDate(date.getDate() + addValue);
+                        else if (addUnit === 'MONTH') newDate.setMonth(date.getMonth() + addValue);
+                        else if (addUnit === 'YEAR') newDate.setFullYear(date.getFullYear() + addValue);
+                        
+                        transformed = newDate.toISOString().split('T')[0];
+                        break;
+                    case 'DATEDIFF':
+                        const compareDate = new Date(document.getElementById('datediff-date').value);
+                        const diffUnit = document.getElementById('datediff-unit').value;
+                        const diffTime = date - compareDate;
+                        
+                        if (diffUnit === 'DAY') {
+                            transformed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                        } else if (diffUnit === 'MONTH') {
+                            const years = compareDate.getFullYear() - date.getFullYear();
+                            const months = compareDate.getMonth() - date.getMonth();
+                            transformed = years * 12 + months;
+                        } else if (diffUnit === 'YEAR') {
+                            transformed = compareDate.getFullYear() - date.getFullYear();
+                        }
+                        break;
+                    case 'YEAR':
+                        transformed = date.getFullYear();
+                        break;
+                    case 'MONTH':
+                        transformed = date.getMonth() + 1; // Months are 0-indexed
+                        break;
+                    case 'DAY':
+                        transformed = date.getDate();
+                        break;
+                    case 'FORMAT':
+                        const formatStr = document.getElementById('format-string').value || 'YYYY-MM-DD';
+                        const monthNames = ["January", "February", "March", "April", "May", "June",
+                                            "July", "August", "September", "October", "November", "December"];
+                        const shortMonthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                        const shortDayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                        
+                        let formatted = formatStr
+                            .replace(/YYYY/g, date.getFullYear())
+                            .replace(/YY/g, String(date.getFullYear()).slice(-2))
+                            .replace(/MM/g, String(date.getMonth() + 1).padStart(2, '0'))
+                            .replace(/M/g, date.getMonth() + 1)
+                            .replace(/MONTH/g, monthNames[date.getMonth()])
+                            .replace(/MON/g, shortMonthNames[date.getMonth()])
+                            .replace(/DD/g, String(date.getDate()).padStart(2, '0'))
+                            .replace(/D/g, date.getDate())
+                            .replace(/DAY/g, dayNames[date.getDay()])
+                            .replace(/DY/g, shortDayNames[date.getDay()]);
+                        
+                        transformed = formatted;
+                        break;
+                    default:
+                        transformed = date.toISOString().split('T')[0];
+                }
+                
+                const transformedSpan = document.createElement('span');
+                transformedSpan.className = 'transformed-value date-transform';
+                transformedSpan.textContent = functionName === 'DATEDIFF' ? 
+                    `${transformed} ${document.getElementById('datediff-unit').value.toLowerCase()}` :
+                    transformed;
+                
+                transformedCell.appendChild(transformedSpan);
+                row.appendChild(originalCell);
+                row.appendChild(transformedCell);
+                resultsContainer.appendChild(row);
+                
+                // Trigger reflow to restart animation
+                void transformedSpan.offsetWidth;
+                transformedSpan.classList.add('date-transform');
+            });
+        });
+        
+        // Initialize with some data
+        document.getElementById('apply-string').click();
+        document.getElementById('apply-numeric').click();
+        document.getElementById('apply-date').click();
+    </script>
+</body>
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Index Visualization</title>
+    <style>
+        body {
+
+
+
+    background: linear-gradient(to bottom right, #0f2027, #2c5364);
+    color: #e0e0e0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.controls {
+    background: #1c2b3a;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 8px 8px 15px #0d1a24, -8px -8px 15px #233a4e;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #a9cce3;
+}
+
+select,
+button {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1c2b3a;
+    color: #dcdcdc;
+    box-shadow: inset 2px 2px 6px #0d1a24, inset -2px -2px 6px #233a4e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button {
+    background: #3498db;
+    color: #fff;
+    box-shadow: 3px 3px 8px #0d1a24, -3px -3px 8px #233a4e;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+.visualization {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.data-table,
+.index-structure {
+    background: #1c2b3a;
+    border-radius: 12px;
+    box-shadow: 8px 8px 15px #0d1a24, -8px -8px 15px #233a4e;
+    overflow: hidden;
+    padding: 15px;
+}
+
+.index-structure {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.data-table {
+    flex: 2;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ecf0f1;
+}
+
+th,
+td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #34495e;
+}
+
+th {
+    background-color: #22303f;
+    font-weight: 600;
+    color: #7ed6df;
+    position: relative;
+}
+
+th.indexed {
+    background-color: #2d4a63;
+}
+
+th.indexed::after {
+    content: "🔍";
+    position: absolute;
+    right: 10px;
+}
+
+tr {
+    transition: background-color 0.3s;
+}
+
+tr.scanned {
+    background-color: rgba(255, 249, 196, 0.1);
+}
+
+tr.found {
+    background-color: rgba(200, 230, 201, 0.1);
+}
+
+.index-node {
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 6px;
+    background-color: #2d4a63;
+    border-left: 3px solid #3498db;
+    display: flex;
+    justify-content: space-between;
+    color: #ecf0f1;
+}
+
+.index-node.highlight {
+    background-color: #3c6382;
+    font-weight: bold;
+}
+
+.performance-metrics {
+    background-color: #1c2b3a;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 8px 8px 15px #0d1a24, -8px -8px 15px #233a4e;
+    color: #ecf0f1;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    height: 20px;
+    background-color: #34495e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress {
+    height: 100%;
+    background-color: #2ecc71;
+    width: 0%;
+    transition: width 0.5s;
+}
+
+.explanation {
+    background-color: #1c2b3a;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 8px 8px 15px #0d1a24, -8px -8px 15px #233a4e;
+    margin-top: 20px;
+    line-height: 1.6;
+    color: #ecf0f1;
+}
+
+.highlight-text {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.query-input {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: none;
+    background: #1c2b3a;
+    color: #ecf0f1;
+    box-shadow: inset 2px 2px 6px #0d1a24, inset -2px -2px 6px #233a4e;
+}
+
+.query-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.speed-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #bdc3c7;
+}
+
+.speed-dots {
+    display: flex;
+    gap: 3px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #7f8c8d;
+}
+
+.dot.active {
+    background-color: #2ecc71;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Index Visualization</h1>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="query-column">Search Column:</label>
+                <select id="query-column">
+                    <option value="id">ID</option>
+                    <option value="name" selected>Name</option>
+                    <option value="email">Email</option>
+                    <option value="department">Department</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="query-value">Search Value:</label>
+                <select id="query-value">
+                    <option value="Alice">Alice</option>
+                    <option value="Bob">Bob</option>
+                    <option value="Charlie">Charlie</option>
+                    <option value="David">David</option>
+                    <option value="Eve">Eve</option>
+                </select>
+            </div>
+            
+            <div class="query-controls">
+                <button id="execute-query">Execute Query</button>
+                <div class="speed-indicator">
+                    <span>Speed:</span>
+                    <div class="speed-dots">
+                        <div class="dot" id="dot-1"></div>
+                        <div class="dot" id="dot-2"></div>
+                        <div class="dot" id="dot-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>Toggle Indexes:</label>
+                <div style="display: flex; gap: 10px;">
+                    <button data-column="id">ID</button>
+                    <button data-column="name">Name</button>
+                    <button data-column="email">Email</button>
+                    <button data-column="department">Department</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="data-table">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th data-column="id">ID</th>
+                            <th data-column="name">Name</th>
+                            <th data-column="email">Email</th>
+                            <th data-column="department">Department</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="index-structure">
+                <h3>Index Structure</h3>
+                <div id="index-view">
+                    <p>No indexes created yet. Click on column headers to create indexes.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="performance-metrics">
+            <h3>Performance Metrics</h3>
+            <div class="metric">
+                <span>Rows Scanned:</span>
+                <span id="rows-scanned">0</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="scan-progress"></div>
+            </div>
+            
+            <div class="metric">
+                <span>Time Taken:</span>
+                <span id="time-taken">0 ms</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="time-progress"></div>
+            </div>
+        </div>
+        
+        <div class="explanation">
+            <h3>How SQL Indexes Work</h3>
+            <p>
+                An index is a <span class="highlight-text">separate data structure</span> that the database maintains to improve query performance. 
+                When you create an index on a column, the database creates a sorted reference to the data.
+            </p>
+            <p>
+                <span class="highlight-text">Without an index</span>, the database must perform a <span class="highlight-text">full table scan</span> 
+                (checking every row) to find matching records, which is slow for large tables.
+            </p>
+            <p>
+                <span class="highlight-text">With an index</span>, the database can quickly locate the data using efficient algorithms 
+                like binary search (for B-tree indexes), dramatically reducing the number of rows that need to be examined.
+            </p>
+            <p>
+                Try creating an index on the "Name" column and then search for a name to see the performance difference!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const data = [
+            { id: 1, name: "Alice", email: "alice@example.com", department: "Engineering" },
+            { id: 2, name: "Bob", email: "bob@example.com", department: "Marketing" },
+            { id: 3, name: "Charlie", email: "charlie@example.com", department: "Sales" },
+            { id: 4, name: "David", email: "david@example.com", department: "Engineering" },
+            { id: 5, name: "Eve", email: "eve@example.com", department: "HR" },
+            { id: 6, name: "Frank", email: "frank@example.com", department: "Marketing" },
+            { id: 7, name: "Grace", email: "grace@example.com", department: "Engineering" },
+            { id: 8, name: "Heidi", email: "heidi@example.com", department: "Sales" },
+            { id: 9, name: "Ivan", email: "ivan@example.com", department: "HR" },
+            { id: 10, name: "Judy", email: "judy@example.com", department: "Marketing" }
+        ];
+
+        // State
+        let indexedColumns = {};
+        let indexStructures = {};
+        
+        // DOM elements
+        const tableBody = document.querySelector('#data-table tbody');
+        const indexView = document.querySelector('#index-view');
+        const executeBtn = document.querySelector('#execute-query');
+        const queryColumn = document.querySelector('#query-column');
+        const queryValue = document.querySelector('#query-value');
+        const rowsScannedEl = document.querySelector('#rows-scanned');
+        const timeTakenEl = document.querySelector('#time-taken');
+        const scanProgress = document.querySelector('#scan-progress');
+        const timeProgress = document.querySelector('#time-progress');
+        const speedDots = [
+            document.querySelector('#dot-1'),
+            document.querySelector('#dot-2'),
+            document.querySelector('#dot-3')
+        ];
+
+        // Initialize the table
+        function renderTable() {
+            tableBody.innerHTML = '';
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = row.id;
+                tr.innerHTML = `
+                    <td>${row.id}</td>
+                    <td>${row.name}</td>
+                    <td>${row.email}</td>
+                    <td>${row.department}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Toggle index on a column
+        function toggleIndex(column) {
+            if (indexedColumns[column]) {
+                // Remove index
+                delete indexedColumns[column];
+                delete indexStructures[column];
+                document.querySelector(`th[data-column="${column}"]`).classList.remove('indexed');
+            } else {
+                // Create index
+                indexedColumns[column] = true;
+                
+                // Create a simple index structure (sorted array of values with row pointers)
+                indexStructures[column] = data.map(row => ({
+                    value: row[column],
+                    id: row.id
+                })).sort((a, b) => {
+                    if (a.value < b.value) return -1;
+                    if (a.value > b.value) return 1;
+                    return 0;
+                });
+                
+                document.querySelector(`th[data-column="${column}"]`).classList.add('indexed');
+            }
+            
+            renderIndexStructure();
+        }
+
+        // Render the index structure visualization
+        function renderIndexStructure() {
+            if (Object.keys(indexStructures).length === 0) {
+                indexView.innerHTML = '<p>No indexes created yet. Click on column buttons above to create indexes.</p>';
+                return;
+            }
+            
+            indexView.innerHTML = '';
+            
+            for (const column in indexStructures) {
+                const columnHeader = document.createElement('h4');
+                columnHeader.textContent = `${column} Index (B-Tree)`;
+                indexView.appendChild(columnHeader);
+                
+                const container = document.createElement('div');
+                
+                // Simplified visualization of a B-tree index
+                indexStructures[column].forEach(item => {
+                    const node = document.createElement('div');
+                    node.className = 'index-node';
+                    node.dataset.value = item.value;
+                    node.dataset.id = item.id;
+                    node.innerHTML = `
+                        <span>${item.value}</span>
+                        <span>→ Row ${item.id}</span>
+                    `;
+                    container.appendChild(node);
+                });
+                
+                indexView.appendChild(container);
+            }
+        }
+
+        // Execute a query
+        async function executeQuery() {
+            const column = queryColumn.value;
+            const value = queryValue.value;
+            
+            // Reset table highlighting
+            document.querySelectorAll('#data-table tr').forEach(tr => {
+                tr.classList.remove('scanned', 'found');
+            });
+            
+            // Reset index highlighting
+            document.querySelectorAll('.index-node').forEach(node => {
+                node.classList.remove('highlight');
+            });
+            
+            // Reset speed dots
+            speedDots.forEach(dot => dot.classList.remove('active'));
+            
+            // Simulate query with index
+            if (indexedColumns[column]) {
+                await queryWithIndex(column, value);
+            } else {
+                await queryWithoutIndex(column, value);
+            }
+        }
+
+        // Simulate query without index (full table scan)
+        async function queryWithoutIndex(column, value) {
+            const startTime = performance.now();
+            let rowsScanned = 0;
+            let found = false;
+            
+            // Show slow speed (all dots)
+            speedDots[0].classList.add('active');
+            
+            for (const row of data) {
+                rowsScanned++;
+                const tr = document.querySelector(`tr[data-id="${row.id}"]`);
+                
+                // Highlight scanned row
+                tr.classList.add('scanned');
+                await sleep(300);
+                
+                if (row[column] === value) {
+                    // Highlight found row
+                    tr.classList.add('found');
+                    found = true;
+                    speedDots[1].classList.add('active');
+                    await sleep(200);
+                }
+                
+                // Update metrics
+                updateMetrics(rowsScanned, performance.now() - startTime);
+                
+                if (found) break;
+            }
+            
+            // Complete speed indication
+            speedDots[2].classList.add('active');
+        }
+
+        // Simulate query with index (using binary search)
+        async function queryWithIndex(column, value) {
+            const startTime = performance.now();
+            let steps = 0;
+            const index = indexStructures[column];
+            
+            // Binary search simulation
+            let left = 0;
+            let right = index.length - 1;
+            
+            // Show fast speed (first dot)
+            speedDots[0].classList.add('active');
+            
+            while (left <= right) {
+                steps++;
+                const mid = Math.floor((left + right) / 2);
+                const midItem = index[mid];
+                
+                // Highlight the current index node being checked
+                const nodes = document.querySelectorAll(`.index-node[data-value="${midItem.value}"]`);
+                nodes.forEach(node => node.classList.add('highlight'));
+                await sleep(500);
+                
+                // Update metrics (estimate rows scanned based on steps)
+                updateMetrics(steps * 2, performance.now() - startTime);
+                
+                if (midItem.value === value) {
+                    // Found - highlight the row
+                    const tr = document.querySelector(`tr[data-id="${midItem.id}"]`);
+                    tr.classList.add('found');
+                    
+                    // Show fast speed indication
+                    speedDots[1].classList.add('active');
+                    await sleep(300);
+                    speedDots[2].classList.add('active');
+                    return;
+                } else if (midItem.value < value) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+                
+                // Remove highlight after comparison
+                nodes.forEach(node => node.classList.remove('highlight'));
+                await sleep(200);
+            }
+            
+            // Complete speed indication even if not found
+            speedDots[1].classList.add('active');
+            speedDots[2].classList.add('active');
+        }
+
+        // Update performance metrics
+        function updateMetrics(rowsScanned, timeTaken) {
+            rowsScannedEl.textContent = rowsScanned;
+            timeTakenEl.textContent = `${Math.round(timeTaken)} ms`;
+            
+            // Update progress bars (scaled for visualization)
+            const maxRows = data.length;
+            const maxTime = indexedColumns[queryColumn.value] ? 1000 : 3000;
+            
+            scanProgress.style.width = `${Math.min(100, (rowsScanned / maxRows) * 100)}%`;
+            timeProgress.style.width = `${Math.min(100, (timeTaken / maxTime) * 100)}%`;
+        }
+
+        // Helper function for delays in animations
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Event listeners
+        document.querySelectorAll('button[data-column]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                toggleIndex(btn.dataset.column);
+            });
+        });
+
+        executeBtn.addEventListener('click', executeQuery);
+
+        // Initialize
+        renderTable();
+        renderIndexStructure();
+    </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+/* General Styling */
+
+body {
+    font-family: 'Courier New', Monospace;
+    margin: 0;
+    padding: 0;
+    background: #1e2a38; /* Your Background Color */
+    color: #f5f5f5; /* Your Text Color */
+}
+
+/* Navigation Bar */
+/* Navbar Container */
+/* Navbar Styles */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #243447;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  z-index: 1000;
+  transition: background 0.3s ease;
+}
+.navbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 10px;
+}
+
+/* Logo on left */
+.logo {
+  flex: 1;
+  text-align: left;
+}
+.logo a {
+  color: #98D2C0;
+  font-size: 22px;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Home link in center */
+.nav-links {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nav-links a {
+  margin: 0 10px;
+  color: #98D2C0;
+  text-decoration: none;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+.nav-links a i {
+  margin-right: 5px;
+  font-size: 16px;
+}
+.nav-links a:hover {
+  color: #FFF2F2;
+  transform: scale(1.1);
+}
+
+/* User and search on right */
+.nav-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.theme-toggle {
+  color: #98D2C0;
+  margin: 0 12px;
+  cursor: pointer;
+}
+.profile-dropdown {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+/* User profile styling */
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-profile i {
+  font-size: 20px;
+  color: #98D2C0;
+}
+
+.username {
+  font-size: 12px;
+  color: #98D2C0;
+  margin-top: 3px;
+}
+
+.profile-dropdown .dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: #243447;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border-radius: 4px;
+  padding: 10px;
+  z-index: 1000;
+  min-width: 150px;
+}
+.profile-dropdown:hover .dropdown-menu {
+  display: block;
+}
+.profile-dropdown .dropdown-menu a {
+  display: block;
+  color: #98D2C0;
+  text-decoration: none;
+  margin: 5px 0;
+  padding: 5px;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+}
+.profile-dropdown .dropdown-menu a i {
+  margin-right: 8px;
+}
+.profile-dropdown .dropdown-menu a:hover {
+  color: #FFF2F2;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}
+
+/* Responsive adjustments (if needed) */
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+  }
+  .nav-links a {
+    margin: 5px 0;
+  }
+}
+/* Taskbar - Circular Shape */
+/* DASHBOARD PAGE */
+.dashboard-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px; /* space below navbar */
+    text-align: center;
+
+
+}
+
+.welcome-text {
+    font-size: 1.8em;
+    margin: 10px 0;
+    color: #eeeeee;
+    text-shadow: 0px 0px 10px #00adb5;
+}
+
+/* WHEEL CONTAINER */
+.rotating-taskwheel {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin-top: 100px;
+    animation: rotateWheel 25s linear infinite;
+    transform-origin: center center;
+}
+
+/* WHEEL PETALS */
+.task-petal {
+    position: absolute;
+    left: 50%;
+    width: 102px;
+    height: 102px;
+    background: #00adb5;
+    border-radius: 50%;
+    color: white;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    pointer-events: auto;
+    z-index: 2;
+}
+
+/* PETAL POSITIONS */
+.task-petal:nth-child(1) { top: 0%; left: 40%; }
+.task-petal:nth-child(2) { top: 15%; left: 75%; }
+.task-petal:nth-child(3) { top: 45%; left: 95%; }
+.task-petal:nth-child(4) { top: 75%; left: 80%; }
+.task-petal:nth-child(5) { top: 90%; left: 45%; }
+.task-petal:nth-child(6) { top: 75%; left: 10%; }
+.task-petal:nth-child(7) { top: 45%; left: -10%; }
+.task-petal:nth-child(8) { top: 15%; left: 5%; }
+.task-petal:nth-child(9) { top: -10%; left: 20%; }
+
+.task-petal:hover {
+    transform: scale(1.5);
+    background-color: #1de9b6;
+    z-index: 2;
+}
+
+.icon {
+    font-size: 30px;
+    margin-bottom: 4px;
+    }
+
+.label {
+    font-size: 15px;
+
+}
+
+a {
+    text-decoration: none;
+}
+
+/* ROTATION ANIMATION */
+@keyframes rotateWheel {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.rotating-taskwheel:hover {
+    animation-play-state: paused;
+}
+
+/* JavaScript will update the progress-fill width based on data-progress */
+
+
+/* Main Content */
+.container {
+    padding: 20px;
+    margin-top: 20px; /* Push content down */
+}
+
+
+/* Authentication Forms */
+.auth-container {
+    background: #2b3a4a;
+    padding: 20px;
+    border-radius: 15px;
+    width: 350px;
+    margin: 30px auto;
+    text-align: center;
+    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.auth-container h2 {
+    color: #98D2C0; /* Your Text Color */
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 2px solid #00adb5; /* Your Input Border Color */
+    border-radius: 8px;
+    background: #3c4a5a;
+    color: #ffffff;
+}
+
+.auth-container input::placeholder {
+    color: #bbb;
+}
+
+.auth-container button {
+    width: 100%;
+    padding: 12px;
+    background: #00adb5; /* Your Button Color */
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.auth-container button:hover {
+    background: #007c80; /* Your Button Hover Color */
+    box-shadow: 0px 0px 10px #007c80;
+}
+
+/* Quiz System */
+.quiz-container {
+    background: #2b3a4a;
+    padding: 20px;
+    border-radius: 15px;
+    width: 550px;
+    margin: 30px auto;
+    text-align: center;
+    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.quiz-container h2 {
+    color: #98D2C0; /* Your Heading Color */
+}
+
+.options li {
+    background: #3c4a5a;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.options li:hover {
+    background: #00adb5; /* Your Hover Color */
+    color: #fff;
+    box-shadow: 0px 0px 10px #00adb5;
+}
+
+/* Score Display */
+.score-container {
+    background: #2b3a4a;
+    padding: 20px;
+    border-radius: 15px;
+    width: 270px;
+    margin: 20px auto;
+    box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.4);
+}
+
+.score-container h2 {
+    color: #98D2C0;
+}
+
+.score-container p {
+    font-size: 22px;
+    font-weight: bold;
+    color: #ffffff;
+}
+/* Fullscreen futuristic background */
+.login-body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background-size: 400% 400%;
+    animation: bgShift 20s ease infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@keyframes bgShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Glassmorphic Login Card */
+.login-glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 40px 35px;
+    width: 400px;
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.2);
+    text-align: center;
+    animation: slideUp 1s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Title */
+.login-title {
+    color: #98D2C0;
+    font-size: 26px;
+    margin-bottom: 25px;
+}
+
+/* Inputs */
+.login-input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    font-size: 15px;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+
+.login-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px #00adb5;
+}
+
+/* Button */
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #00adb5;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background 0.3s ease, transform 0.3s ease;
+}
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 70px); /* Adjust if your navbar height is different */
+    margin-top: 0px; /* Same as your navbar height */
+}
+.login-btn:hover {
+    background: #1de9b6;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px #1de9b6;
+}
+
+/* Register link */
+.register-link {
+    display: block;
+    margin-top: 20px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.register-link:hover {
+    color: #fff;
+}
+.home-body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(-45deg, #1e2a38, #243447, #00adb5, #16222a);
+    background-size: 400% 400%;
+    animation: waveGlow 12s ease infinite;
+}
+
+@keyframes waveGlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 60px;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #1e2a38, #121c28);
+    overflow: hidden;
+}
+
+.intro-section {
+    text-align: center;
+    margin-top: 100px;
+    color: #98D2C0;
+}
+
+.main-heading {
+    font-size: 3em;
+    margin-bottom: 0.3em;
+    text-shadow: 0px 0px 20px #00adb5;
+}
+
+.sub-heading {
+    font-size: 1.3em;
+    margin-bottom: 1.5em;
+    color: #cddcdc;
+}
+
+.cta-button {
+    padding: 12px 25px;
+    font-size: 1.1em;
+    background: #00adb5;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+.cta-button:hover {
+    background: #1de9b6;
+    box-shadow: 0 0 15px #1de9b6;
+    transform: scale(1.05);
+}
+
+.quiz-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #00cec9, #0984e3);
+    color: white;
+
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.quiz-button:hover {
+    background: linear-gradient(135deg, #00b894, #6c5ce7);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+.aggregate-page {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+.aggregate-left {
+    flex: 1;
+    padding-right: 30px;
+}
+
+.aggregate-right {
+    width: 350px;
+    position: relative;
+}
+
+.taskbar-container {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    float: left;
+    margin-right: 40px;
+    margin-top: 100px;
+
+
+}
+
+.taskbar-wheel {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* <-- This makes the whole wheel invisible to mouse clicks */
+    z-index: 1;
+}
+
+.taskbar-wheel-inner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: orbit-spin 20s linear infinite;
+    transform-origin: center center;
+}
+
+/* Each petal is placed statically in the center, then offset by translate + rotation */
+.taskbar-petal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    height: 100px;
+    margin: -50px; /* to center the petal */
+    background: #00adb5;
+    color: white;
+    font-family: monospace;
+    font-size: 12px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s;
+     pointer-events: auto; /* <-- Enable pointer events just for petals */
+    z-index: 2;
+}
+
+/* Keep petal content upright */
+.taskbar-petal > * {
+    transform: rotate(-0deg);
+}
+
+/* Petals in a circular orbit */
+.taskbar-petal:nth-child(1) { transform: rotate(0deg) translateY(-160px); }
+.taskbar-petal:nth-child(2) { transform: rotate(45deg) translateY(-160px); }
+.taskbar-petal:nth-child(3) { transform: rotate(90deg) translateY(-160px); }
+.taskbar-petal:nth-child(4) { transform: rotate(135deg) translateY(-160px); }
+.taskbar-petal:nth-child(5) { transform: rotate(180deg) translateY(-160px); }
+.taskbar-petal:nth-child(6) { transform: rotate(225deg) translateY(-160px); }
+.taskbar-petal:nth-child(7) { transform: rotate(270deg) translateY(-160px); }
+.taskbar-petal:nth-child(8) { transform: rotate(315deg) translateY(-160px); }
+
+.taskbar-petal:hover {
+        background: #dceeff;
+        color: #007acc;
+}
+
+.taskbar-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    background: #007acc;
+    color: white;
+    font-family: monospace;
+    font-size: 12px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.taskbar-icon {
+    font-size: 20px;
+    margin-bottom: 5px;
+
+}
+
+.taskbar-label {
+    font-size: 12px;
+}
+
+@keyframes orbit-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Add styles for logout button/link */
+.logout-link {
+  display: block;
+  color: #98D2C0;
+  text-decoration: none;
+  margin: 5px 0;
+  padding: 5px;
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+}
+
+.logout-link i {
+  margin-right: 8px;
+}
+
+.logout-link:hover {
+  color: #FFF2F2;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+}

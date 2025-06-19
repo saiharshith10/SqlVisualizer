@@ -1,0 +1,23 @@
+{% include 'header.html' %}
+
+<html lang="en">
+<head>
+    <title>SQL Visualizer - Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="home-body">
+    <div class="home-container">
+        <div class="intro-section">
+            <h1 class="main-heading">Welcome to SQL Visualizer</h1>
+            <p class="sub-heading">Automated, Animated, and Awesome Learning for SQL</p>
+            
+            {% if 'user_id' in session %}
+                <a href="{{ url_for('dashboard') }}" class="cta-button">Start Learning 🚀</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="cta-button">Start Learning 🚀</a>
+            {% endif %}
+
+        </div>
+    </div>
+</body>
+</html>

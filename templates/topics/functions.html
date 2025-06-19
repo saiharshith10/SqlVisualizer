@@ -1,0 +1,17 @@
+{% include 'header.html' %}
+
+<div class="main-content">
+    <!-- Taskbar aligned to the left -->
+    <div style="float: left; width: 300px; margin-left:10px;">
+        {% include 'taskbar.html' with context %}
+    </div>
+
+    <!-- Main content stays to the right -->
+    <div class="topic-body" style="margin-left: 420px; margin-top:10px; ">
+        {% include 'Functions_vis.html' %}
+
+        <div class="quiz-button">
+            <a href="{{ url_for('quiz', topic='Functions') }}" class="btn-quiz">🧠 Take Quiz</a>
+        </div>
+    </div>
+</div>

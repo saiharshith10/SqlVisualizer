@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL WHERE & WITH Visualization</title>
+    <style>
+        :root {
+    --primary: #3498db;
+    --secondary: #e74c3c;
+    --highlight: #2ecc71;
+    --text: #ecf0f1;
+    --bg-gradient-start: #0f2027;
+    --bg-gradient-end: #2c5364;
+    --card-bg: #1c2e3e;
+    --border: #3c4c5c;
+    --soft-shadow: rgba(0, 0, 0, 0.3);
+    --neumorph-inset: inset 2px 2px 5px #0a1a26, inset -2px -2px 5px #2d4b64;
+    --neumorph-out: 4px 4px 10px #0a1a26, -4px -4px 10px #2d4b64;
+}
+
+body {
+
+    background: linear-gradient(to bottom right, var(--bg-gradient-start), var(--bg-gradient-end));
+    color: var(--text);
+    margin: 0;
+
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h1 {
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.description {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: var(--neumorph-out);
+    margin-bottom: 30px;
+}
+
+.visualization-area {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.data-section {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.table-container {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--neumorph-out);
+    padding: 15px;
+    flex: 1;
+    min-width: 300px;
+    transition: all 0.3s ease;
+}
+
+.table-container.cte {
+    background-color: #22394f;
+    border-left: 4px solid var(--primary);
+}
+
+.table-container h3 {
+    margin-top: 0;
+    color: var(--primary);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.table-container h3 .sql-keyword {
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    color: var(--text);
+}
+
+th {
+    background-color: #1c2e3e;
+    text-align: left;
+    padding: 10px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.5s ease;
+}
+
+tr.highlight {
+    background-color: rgba(255, 255, 153, 0.1);
+}
+
+tr.filtered-out {
+    opacity: 0.3;
+    transform: scale(0.98);
+}
+
+tr.being-filtered {
+    transition: all 0.8s ease;
+}
+
+.controls {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--neumorph-out);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.control-group {
+    margin-bottom: 20px;
+}
+
+.control-group h3 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+input, select {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text);
+    box-shadow: var(--neumorph-inset);
+    width: 100%;
+    max-width: 300px;
+    font-size: 14px;
+}
+
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s, transform 0.3s;
+    box-shadow: var(--neumorph-out);
+}
+
+button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px var(--soft-shadow);
+}
+
+.query-display {
+    background-color: #142733;
+    border-left: 4px solid var(--primary);
+    padding: 15px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    border-radius: 6px;
+    margin-top: 20px;
+    overflow-x: auto;
+    box-shadow: var(--neumorph-inset);
+}
+
+.sql-keyword {
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+.arrow {
+    text-align: center;
+    font-size: 24px;
+    color: #95a5a6;
+    margin: 10px 0;
+}
+
+.animation-container {
+    position: relative;
+    height: 50px;
+    margin: 20px 0;
+}
+
+.data-flow {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: var(--primary);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+@keyframes flow {
+    0% { left: 0; opacity: 0; }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { left: calc(100% - 20px); opacity: 0; }
+}
+
+.hidden {
+    display: none;
+}
+
+.cte-connection {
+    position: relative;
+    height: 40px;
+    margin: 10px 0;
+}
+
+.connection-line {
+    position: absolute;
+    height: 2px;
+    background-color: var(--primary);
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.connection-arrow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 12px solid var(--primary);
+    transform: translateY(-50%);
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL WHERE & WITH Clause Visualization</h1>
+        
+        <div class="description">
+            <p>This interactive visualization demonstrates how SQL's <strong>WHERE</strong> clause filters data and how <strong>WITH</strong> (Common Table Expressions) creates temporary result sets. Modify the controls below to see the effects in real-time.</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <h3>WHERE Clause Controls</h3>
+                <label for="where-column">Column:</label>
+                <select id="where-column">
+                    <option value="name">Name</option>
+                    <option value="department">Department</option>
+                    <option value="salary">Salary</option>
+                    <option value="experience">Experience (years)</option>
+                </select>
+                
+                <label for="where-operator">Operator:</label>
+                <select id="where-operator">
+                    <option value="=">= (Equals)</option>
+                    <option value=">">> (Greater than)</option>
+                    <option value="<">< (Less than)</option>
+                    <option value=">=">>= (Greater or equal)</option>
+                    <option value="<="><= (Less or equal)</option>
+                    <option value="!=">!= (Not equal)</option>
+                    <option value="LIKE">LIKE (Pattern match)</option>
+                </select>
+                
+                <label for="where-value">Value:</label>
+                <input type="text" id="where-value" placeholder="Enter filter value">
+                
+                <button id="apply-where">Apply WHERE Filter</button>
+                <button id="reset-where">Reset WHERE</button>
+            </div>
+            
+            <div class="control-group">
+                <h3>WITH Clause (CTE) Controls</h3>
+                <label for="cte-name">CTE Name:</label>
+                <input type="text" id="cte-name" placeholder="e.g., high_salary_employees" value="high_salary_employees">
+                
+                <label for="cte-condition">CTE Condition:</label>
+                <select id="cte-condition">
+                    <option value="salary > 70000">Salary > 70,000</option>
+                    <option value="department = 'Engineering'">Department = Engineering</option>
+                    <option value="experience >= 5">Experience ≥ 5 years</option>
+                    <option value="name LIKE 'A%'">Name starts with A</option>
+                </select>
+                
+                <button id="apply-cte">Create CTE</button>
+                <button id="remove-cte">Remove CTE</button>
+            </div>
+            
+            <div class="query-display" id="query-display">
+                -- Your SQL query will appear here
+            </div>
+        </div>
+        
+        <div class="visualization-area">
+            <div id="cte-section" class="hidden">
+                <div class="data-section">
+                    <div class="table-container">
+                        <h3>Original Employees Table</h3>
+                        <table id="original-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Salary</th>
+                                    <th>Experience</th>
+                                </tr>
+                            </thead>
+                            <tbody id="original-data">
+                                <!-- Data will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="table-container cte">
+                        <h3><span class="sql-keyword">WITH</span> <span id="cte-name-display">cte_name</span> AS (...)</h3>
+                        <table id="cte-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Salary</th>
+                                    <th>Experience</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cte-data">
+                                <!-- CTE data will be inserted here by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="cte-connection">
+                    <div class="connection-line"></div>
+                    <div class="connection-arrow"></div>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <div class="table-container">
+                    <h3>Final Result <span id="result-source"></span></h3>
+                    <table id="result-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Salary</th>
+                                <th>Experience</th>
+                            </tr>
+                        </thead>
+                        <tbody id="result-data">
+                            <!-- Result data will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const employees = [
+            { id: 1, name: "Alice Johnson", department: "Engineering", salary: 85000, experience: 7 },
+            { id: 2, name: "Bob Smith", department: "Marketing", salary: 65000, experience: 4 },
+            { id: 3, name: "Charlie Brown", department: "Engineering", salary: 75000, experience: 5 },
+            { id: 4, name: "David Wilson", department: "HR", salary: 60000, experience: 3 },
+            { id: 5, name: "Eva Davis", department: "Engineering", salary: 90000, experience: 8 },
+            { id: 6, name: "Frank Miller", department: "Marketing", salary: 70000, experience: 6 },
+            { id: 7, name: "Grace Lee", department: "Finance", salary: 80000, experience: 5 },
+            { id: 8, name: "Henry Taylor", department: "Engineering", salary: 95000, experience: 10 }
+        ];
+
+        // DOM elements
+        const originalDataTbody = document.getElementById('original-data');
+        const cteDataTbody = document.getElementById('cte-data');
+        const resultDataTbody = document.getElementById('result-data');
+        const queryDisplay = document.getElementById('query-display');
+        const cteSection = document.getElementById('cte-section');
+        const resultSource = document.getElementById('result-source');
+        
+        // State variables
+        let currentWhereFilter = null;
+        let currentCTE = null;
+        let cteActive = false;
+
+        // Initialize the tables
+        function initializeTables() {
+            renderTable(originalDataTbody, employees);
+            renderTable(resultDataTbody, employees);
+            updateQueryDisplay();
+        }
+
+        // Render a table with data
+        function renderTable(tbody, data) {
+            tbody.innerHTML = '';
+            data.forEach(employee => {
+                const row = document.createElement('tr');
+                row.dataset.id = employee.id;
+                
+                row.innerHTML = `
+                    <td>${employee.id}</td>
+                    <td>${employee.name}</td>
+                    <td>${employee.department}</td>
+                    <td>$${employee.salary.toLocaleString()}</td>
+                    <td>${employee.experience}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Apply WHERE filter
+        function applyWhereFilter() {
+            const column = document.getElementById('where-column').value;
+            const operator = document.getElementById('where-operator').value;
+            const value = document.getElementById('where-value').value;
+            
+            currentWhereFilter = { column, operator, value };
+            
+            // Highlight rows that will be filtered out
+            const rows = originalDataTbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const id = parseInt(row.dataset.id);
+                const employee = employees.find(e => e.id === id);
+                const matches = matchesFilter(employee, currentWhereFilter);
+                
+                row.classList.add('being-filtered');
+                row.classList.toggle('filtered-out', !matches);
+                
+                // Remove the transition class after animation completes
+                setTimeout(() => {
+                    row.classList.remove('being-filtered');
+                }, 800);
+            });
+            
+            // Update the result table
+            updateResultTable();
+            updateQueryDisplay();
+        }
+
+        // Check if an employee matches the current filter
+        function matchesFilter(employee, filter) {
+            if (!filter) return true;
+            
+            const { column, operator, value } = filter;
+            const employeeValue = employee[column];
+            
+            // Handle different operators
+            switch (operator) {
+                case '=':
+                    return employeeValue == value;
+                case '!=':
+                    return employeeValue != value;
+                case '>':
+                    return employeeValue > (isNaN(value) ? value : Number(value));
+                case '<':
+                    return employeeValue < (isNaN(value) ? value : Number(value));
+                case '>=':
+                    return employeeValue >= (isNaN(value) ? value : Number(value));
+                case '<=':
+                    return employeeValue <= (isNaN(value) ? value : Number(value));
+                case 'LIKE':
+                    const pattern = value.replace(/%/g, '.*').replace(/_/g, '.');
+                    const regex = new RegExp(`^${pattern}$`, 'i');
+                    return regex.test(employeeValue);
+                default:
+                    return true;
+            }
+        }
+
+        // Reset WHERE filter
+        function resetWhereFilter() {
+            currentWhereFilter = null;
+            
+            // Remove all filtering classes
+            const rows = originalDataTbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                row.classList.remove('filtered-out', 'being-filtered');
+            });
+            
+            updateResultTable();
+            updateQueryDisplay();
+        }
+
+        // Apply CTE
+        function applyCTE() {
+            const cteName = document.getElementById('cte-name').value;
+            const condition = document.getElementById('cte-condition').value;
+            
+            // Parse the condition (simplified for this demo)
+            let column, operator, value;
+            if (condition.includes('LIKE')) {
+                [column, operator, value] = condition.split(/\s+/);
+                value = condition.split("'")[1]; // Get value between quotes
+            } else {
+                [column, operator, value] = condition.split(/\s+/);
+                
+                // Convert numeric values
+                if (!isNaN(value)) {
+                    value = Number(value);
+                } else if (value.startsWith("'") && value.endsWith("'")) {
+                    value = value.slice(1, -1);
+                }
+            }
+            
+            currentCTE = {
+                name: cteName,
+                condition: { column, operator, value }
+            };
+            
+            cteActive = true;
+            cteSection.classList.remove('hidden');
+            document.getElementById('cte-name-display').textContent = cteName;
+            
+            // Filter data for CTE
+            const cteData = employees.filter(emp => matchesFilter(emp, currentCTE.condition));
+            renderTable(cteDataTbody, cteData);
+            
+            // Animate data flow
+            animateDataFlow();
+            
+            updateResultTable();
+            updateQueryDisplay();
+        }
+
+        // Remove CTE
+        function removeCTE() {
+            currentCTE = null;
+            cteActive = false;
+            cteSection.classList.add('hidden');
+            
+            updateResultTable();
+            updateQueryDisplay();
+        }
+
+        // Update the result table based on current filters and CTE
+        function updateResultTable() {
+            let resultData;
+            
+            if (cteActive) {
+                // Apply CTE filter first
+                resultData = employees.filter(emp => matchesFilter(emp, currentCTE.condition));
+                resultSource.textContent = "(from CTE)";
+            } else {
+                resultData = [...employees];
+                resultSource.textContent = "";
+            }
+            
+            // Then apply WHERE filter if exists
+            if (currentWhereFilter) {
+                resultData = resultData.filter(emp => matchesFilter(emp, currentWhereFilter));
+            }
+            
+            renderTable(resultDataTbody, resultData);
+        }
+
+        // Update the query display
+        function updateQueryDisplay() {
+            let query = '';
+            
+            if (cteActive) {
+                query += `WITH ${currentCTE.name} AS (\n`;
+                query += `  SELECT * FROM employees\n`;
+                query += `  WHERE ${currentCTE.condition.column} ${currentCTE.condition.operator} `;
+                
+                if (typeof currentCTE.condition.value === 'string' && !currentCTE.condition.value.match(/^\d+$/)) {
+                    query += `'${currentCTE.condition.value}'`;
+                } else {
+                    query += currentCTE.condition.value;
+                }
+                
+                query += `\n)\n\n`;
+                query += `SELECT * FROM ${currentCTE.name}`;
+            } else {
+                query += `SELECT * FROM employees`;
+            }
+            
+            if (currentWhereFilter) {
+                query += `\nWHERE ${currentWhereFilter.column} ${currentWhereFilter.operator} `;
+                
+                if (currentWhereFilter.operator === 'LIKE' || 
+                    (typeof currentWhereFilter.value === 'string' && !currentWhereFilter.value.match(/^\d+$/))) {
+                    query += `'${currentWhereFilter.value}'`;
+                } else {
+                    query += currentWhereFilter.value;
+                }
+            }
+            
+            query += ';';
+            
+            // Highlight SQL keywords
+            query = query
+                .replace(/(SELECT|FROM|WHERE|WITH|AS|AND|OR|LIKE)/g, '<span class="sql-keyword">$1</span>')
+                .replace(/(\d+)/g, '<span style="color: #27ae60;">$1</span>');
+            
+            queryDisplay.innerHTML = query;
+        }
+
+        // Animate data flowing from original table to CTE
+        function animateDataFlow() {
+            const animationContainer = document.createElement('div');
+            animationContainer.className = 'animation-container';
+            cteSection.insertBefore(animationContainer, cteSection.querySelector('.arrow'));
+            
+            for (let i = 0; i < 5; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'data-flow';
+                animationContainer.appendChild(dot);
+                
+                // Random delay between 0 and 1s
+                const delay = Math.random() * 1000;
+                
+                setTimeout(() => {
+                    dot.style.animation = 'flow 1.5s forwards';
+                    
+                    // Remove dot after animation
+                    setTimeout(() => {
+                        dot.remove();
+                    }, 1500);
+                }, delay);
+            }
+            
+            // Remove container after all animations complete
+            setTimeout(() => {
+                animationContainer.remove();
+            }, 2500);
+        }
+
+        // Event listeners
+        document.getElementById('apply-where').addEventListener('click', applyWhereFilter);
+        document.getElementById('reset-where').addEventListener('click', resetWhereFilter);
+        document.getElementById('apply-cte').addEventListener('click', applyCTE);
+        document.getElementById('remove-cte').addEventListener('click', removeCTE);
+
+        // Initialize the visualization
+        initializeTables();
+    </script>
+</body>
+</html>

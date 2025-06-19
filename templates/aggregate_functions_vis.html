@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Aggregate Functions Visualization</title>
+    <style>
+        body {
+
+    background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+    margin: 0;
+
+    color: #f0f0f0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #1c1f2b;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    padding: 30px;
+}
+
+h1 {
+    color: #00b894;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.description {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #b2bec3;
+    line-height: 1.6;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.function-btn {
+    padding: 10px 20px;
+    background: linear-gradient(145deg, #16a085, #1abc9c);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.function-btn:hover {
+    background: #0e7e6c;
+    transform: translateY(-2px);
+}
+
+.function-btn.active {
+    background-color: #2c3e50;
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.data-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.data-control-btn {
+    padding: 8px 15px;
+    background-color: #636e72;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.data-control-btn:hover {
+    background-color: #b2bec3;
+    color: #2d3436;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    color: #f0f0f0;
+}
+
+.data-table th, .data-table td {
+    border: 1px solid #444;
+    padding: 12px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #2d3436;
+}
+
+.data-table tr:nth-child(even) {
+    background-color: #242731;
+}
+
+.highlight {
+    background-color: #fab1a0 !important;
+    transition: background-color 0.5s ease;
+}
+
+.result-display {
+    text-align: center;
+    padding: 20px;
+    background-color: #2f3640;
+    border-radius: 8px;
+    margin-top: 20px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.result-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: #00cec9;
+    margin: 10px 0;
+    transition: all 0.5s ease;
+}
+
+.result-label {
+    font-size: 18px;
+    color: #b2bec3;
+}
+
+.visualization {
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 20px;
+    background-color: #2f3640;
+    border-radius: 8px;
+    margin-top: 20px;
+    position: relative;
+}
+
+.bar {
+    width: 40px;
+    background-color: #0984e3;
+    border-radius: 5px 5px 0 0;
+    transition: height 1s ease, background-color 0.3s ease;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.bar-label, .bar-value {
+    position: absolute;
+    font-size: 14px;
+    color: #f0f0f0;
+}
+
+.bar-label {
+    top: -25px;
+}
+
+.bar-value {
+    bottom: -25px;
+}
+
+.highlight-bar {
+    background-color: #e17055 !important;
+}
+
+.sql-code {
+    background-color: #1e272e;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.sql-keyword {
+    color: #ff7675;
+}
+
+.sql-function {
+    color: #74b9ff;
+}
+
+.sql-table {
+    color: #55efc4;
+}
+
+.sql-column {
+    color: #ffeaa7;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 0.5s ease;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SQL Aggregate Functions Visualization</h1>
+        <p class="description">
+            Explore how SQL aggregate functions work by applying them to a sample dataset.
+            Click on the function buttons to see the calculation in action.
+        </p>
+
+        <div class="data-controls">
+            <button class="data-control-btn" id="add-row">Add Random Row</button>
+            <button class="data-control-btn" id="reset-data">Reset Data</button>
+        </div>
+
+        <div class="controls">
+            <button class="function-btn" data-function="COUNT">COUNT</button>
+            <button class="function-btn" data-function="SUM">SUM</button>
+            <button class="function-btn" data-function="AVG">AVG</button>
+            <button class="function-btn" data-function="MIN">MIN</button>
+            <button class="function-btn" data-function="MAX">MAX</button>
+        </div>
+
+        <div class="data-section">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body">
+                    <!-- Data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+
+            <div class="result-display">
+                <div class="result-label">Select a function to see the result</div>
+                <div class="result-value" id="result-value">-</div>
+                <div class="sql-code" id="sql-code">
+                    <span class="sql-keyword">SELECT</span> <span class="sql-function">FUNCTION</span>(<span class="sql-column">column</span>) <span class="sql-keyword">FROM</span> <span class="sql-table">table</span>;
+                </div>
+            </div>
+
+            <div class="visualization" id="visualization">
+                <!-- Bars will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample initial data
+        let data = [
+            { id: 1, product: "Laptop", price: 999, quantity: 5 },
+            { id: 2, product: "Phone", price: 699, quantity: 10 },
+            { id: 3, product: "Tablet", price: 349, quantity: 8 },
+            { id: 4, product: "Monitor", price: 249, quantity: 3 },
+            { id: 5, product: "Keyboard", price: 49, quantity: 15 }
+        ];
+
+        let currentFunction = null;
+        let highlightedCells = [];
+
+        // DOM elements
+        const dataBody = document.getElementById('data-body');
+        const resultValue = document.getElementById('result-value');
+        const sqlCode = document.getElementById('sql-code');
+        const visualization = document.getElementById('visualization');
+        const addRowBtn = document.getElementById('add-row');
+        const resetDataBtn = document.getElementById('reset-data');
+        const functionBtns = document.querySelectorAll('.function-btn');
+
+        // Initialize the table
+        function renderTable() {
+            dataBody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id}</td>
+                    <td>${item.product}</td>
+                    <td class="price-cell">$${item.price}</td>
+                    <td class="quantity-cell">${item.quantity}</td>
+                `;
+                dataBody.appendChild(row);
+            });
+
+            // If a function is selected, reapply it
+            if (currentFunction) {
+                applyFunction(currentFunction);
+            }
+        }
+
+        // Apply the selected aggregate function
+        function applyFunction(func) {
+            // Remove previous highlights
+            highlightedCells.forEach(cell => {
+                cell.classList.remove('highlight');
+            });
+            highlightedCells = [];
+
+            // Clear visualization
+            visualization.innerHTML = '';
+
+            // Get all quantity cells
+            const quantityCells = document.querySelectorAll('.quantity-cell');
+            const prices = data.map(item => item.price);
+            const quantities = data.map(item => item.quantity);
+
+            let result;
+            let column;
+            let highlightIndices = [];
+
+            switch(func) {
+                case 'COUNT':
+                    result = data.length;
+                    column = '*';
+                    break;
+                case 'SUM':
+                    result = quantities.reduce((a, b) => a + b, 0);
+                    column = 'quantity';
+                    break;
+                case 'AVG':
+                    const sum = quantities.reduce((a, b) => a + b, 0);
+                    result = (sum / data.length).toFixed(2);
+                    column = 'quantity';
+                    break;
+                case 'MIN':
+                    result = Math.min(...quantities);
+                    column = 'quantity';
+                    highlightIndices = quantities.map((q, i) => q === result ? i : -1).filter(i => i !== -1);
+                    break;
+                case 'MAX':
+                    result = Math.max(...quantities);
+                    column = 'quantity';
+                    highlightIndices = quantities.map((q, i) => q === result ? i : -1).filter(i => i !== -1);
+                    break;
+            }
+
+            // Highlight relevant cells
+            highlightIndices.forEach(index => {
+                const cells = document.querySelectorAll('.quantity-cell');
+                if (cells[index]) {
+                    cells[index].classList.add('highlight');
+                    highlightedCells.push(cells[index]);
+                }
+            });
+
+            // Update result display
+            resultValue.textContent = result;
+            resultValue.classList.add('pulse');
+            setTimeout(() => resultValue.classList.remove('pulse'), 500);
+
+            // Update SQL code
+            sqlCode.innerHTML = `
+                <span class="sql-keyword">SELECT</span> <span class="sql-function">${func}</span>(<span class="sql-column">${column}</span>) <span class="sql-keyword">FROM</span> <span class="sql-table">products</span>;
+            `;
+
+            // Create visualization bars
+            if (func === 'COUNT' || func === 'SUM') {
+                // For COUNT and SUM, show a single bar
+                const bar = document.createElement('div');
+                bar.className = 'bar highlight-bar';
+                bar.style.height = `${Math.min(result * 5, 180)}px`;
+
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = func;
+
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = result;
+
+                bar.appendChild(label);
+                bar.appendChild(value);
+                visualization.appendChild(bar);
+            } else if (func === 'AVG') {
+                // For AVG, show all values and the average line
+                quantities.forEach((q, i) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.height = `${Math.min(q * 5, 180)}px`;
+
+                    const label = document.createElement('div');
+                    label.className = 'bar-label';
+                    label.textContent = `#${i+1}`;
+
+                    const value = document.createElement('div');
+                    value.className = 'bar-value';
+                    value.textContent = q;
+
+                    bar.appendChild(label);
+                    bar.appendChild(value);
+                    visualization.appendChild(bar);
+                });
+
+                // Add average line
+                const avgLine = document.createElement('div');
+                avgLine.className = 'avg-line';
+                avgLine.style.position = 'absolute';
+                avgLine.style.left = '0';
+                avgLine.style.right = '0';
+                avgLine.style.height = '2px';
+                avgLine.style.backgroundColor = '#e74c3c';
+                avgLine.style.bottom = `${Math.min(result * 5, 180)}px`;
+                avgLine.style.width = '100%';
+
+                const avgLabel = document.createElement('div');
+                avgLabel.className = 'bar-label';
+                avgLabel.textContent = 'AVG';
+                avgLabel.style.position = 'absolute';
+                avgLabel.style.right = '-40px';
+                avgLabel.style.bottom = `${Math.min(result * 5, 180) - 10}px`;
+                avgLabel.style.color = '#e74c3c';
+
+                visualization.appendChild(avgLine);
+                visualization.appendChild(avgLabel);
+            } else if (func === 'MIN' || func === 'MAX') {
+                // For MIN/MAX, show all values with min/max highlighted
+                quantities.forEach((q, i) => {
+                    const bar = document.createElement('div');
+                    bar.className = highlightIndices.includes(i) ? 'bar highlight-bar' : 'bar';
+                    bar.style.height = `${Math.min(q * 5, 180)}px`;
+
+                    const label = document.createElement('div');
+                    label.className = 'bar-label';
+                    label.textContent = `#${i+1}`;
+
+                    const value = document.createElement('div');
+                    value.className = 'bar-value';
+                    value.textContent = q;
+
+                    bar.appendChild(label);
+                    bar.appendChild(value);
+                    visualization.appendChild(bar);
+                });
+            }
+        }
+
+        // Add event listeners to function buttons
+        functionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                functionBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const func = btn.getAttribute('data-function');
+                currentFunction = func;
+                applyFunction(func);
+            });
+        });
+
+        // Add random row
+        addRowBtn.addEventListener('click', () => {
+            const products = ['Laptop', 'Phone', 'Tablet', 'Monitor', 'Keyboard', 'Mouse', 'Headphones', 'Printer'];
+            const randomProduct = products[Math.floor(Math.random() * products.length)];
+            const randomPrice = Math.floor(Math.random() * 900) + 50;
+            const randomQuantity = Math.floor(Math.random() * 20) + 1;
+
+            data.push({
+                id: data.length + 1,
+                product: randomProduct,
+                price: randomPrice,
+                quantity: randomQuantity
+            });
+
+            renderTable();
+        });
+
+        // Reset data
+        resetDataBtn.addEventListener('click', () => {
+            data = [
+                { id: 1, product: "Laptop", price: 999, quantity: 5 },
+                { id: 2, product: "Phone", price: 699, quantity: 10 },
+                { id: 3, product: "Tablet", price: 349, quantity: 8 },
+                { id: 4, product: "Monitor", price: 249, quantity: 3 },
+                { id: 5, product: "Keyboard", price: 49, quantity: 15 }
+            ];
+
+            renderTable();
+        });
+
+        // Initialize
+        renderTable();
+    </script>
+</body>
+</html>

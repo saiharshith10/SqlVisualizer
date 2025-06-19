@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Result</title>
+    <style>
+        body {
+            background: #0f2027;
+            color: #fff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .result-box {
+            background: linear-gradient(to right, #2c5364, #203a43, #0f2027);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 0 15px #000;
+            text-align: center;
+        }
+        .result-box h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .result-box p {
+            font-size: 1.2em;
+        }
+        .result-box a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="result-box">
+        <h2>Well done, {{ user.username }}!</h2>
+        <p>Your previous score is  <strong>{{ previous_score }}</strong></p>
+        <p>You scored <strong>{{ current_score }}</strong> out of <strong>{{ total }}</strong>.</p>
+        <p><a href="{{ url_for('dashboard') }}">Return to Dashboard</a></p>
+    </div>
+</body>
+</html>
